@@ -3,7 +3,9 @@
 chaos4g(Chaos Framework for Groovy) is a framework designed to make a groovy application support hotswap. 
 
 ------------------------
+
 TODO
+
 ------------------------
 
 ## Motivation
@@ -28,8 +30,8 @@ It looks impossible.
 - 2 ways to compile: 
 
   1. compile as normal, it can figure out a lot of problem at compile stage
-  2. load classes by GroovyClassLoader, before we do it transver the AST of class and replace type with `def`
+  2. load classes by GroovyClassLoader, before we do it traversal the AST of class and replace type with `def`
 
-## How to used
+## How to use
 
 TODO
