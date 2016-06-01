@@ -9,6 +9,11 @@ import java.lang.annotation.Target
 /**
  * me.chaopeng.chaos4g.summer.ioc.annotations.Initialization
  *
+ * Caution!!!
+ * <ul>
+ *   <li>@Initialization method will invoke after Construtor and @Inject... Bean is already in Context</li>
+ *   <li>Unsupport method with argument</li>
+ * </ul>
  * @author chao
  * @version 1.0 - 2016-06-01
  */

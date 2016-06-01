@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy
 import java.lang.annotation.Target
 
 /**
- * me.chaopeng.chaos4g.summer.ioc.annotations.Singleton
+ * me.chaopeng.chaos4g.summer.ioc.annotations.Bean
  *
  * @author chao
  * @version 1.0 - 2016-05-31
@@ -15,6 +15,6 @@ import java.lang.annotation.Target
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@interface Singleton {
+@interface Bean {
     String value() default "";
 }
