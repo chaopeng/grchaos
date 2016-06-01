@@ -1,1 +1,1 @@
-include 'chaos4g-ioc', 'chaos4g-tools', 'chaos4g-application'
+include 'chaos4g-summer', 'chaos4g-tools', 'chaos4g-application'
