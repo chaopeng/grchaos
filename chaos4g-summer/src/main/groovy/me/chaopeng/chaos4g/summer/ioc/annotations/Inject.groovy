@@ -12,7 +12,6 @@ import java.lang.annotation.Target
  * @author chao
  * @version 1.0 - 2016-05-31
  */
-
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
