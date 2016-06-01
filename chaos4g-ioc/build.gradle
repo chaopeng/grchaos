@@ -1,0 +1,15 @@
+dependencies {
+  compile (
+    libs.groovy,
+    libs.guava,
+    libs.slf4j
+  )
+  
+  testCompile (
+    libs.spock
+  )
+  
+  runtime (
+    libs.logback
+  )
+}

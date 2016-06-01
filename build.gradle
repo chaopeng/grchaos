@@ -1,0 +1,34 @@
+plugins {
+    id "com.github.ben-manes.versions" version "0.12.0"
+}
+
+apply plugin: 'groovy'
+apply plugin: 'idea'
+
+subprojects {
+
+	apply plugin: 'groovy'
+    apply plugin: 'com.github.ben-manes.versions'
+    apply from: rootDir.path + '/libraries.gradle'
+
+    compileJava.options.encoding = 'UTF-8'
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    ext.isProject = new File(projectDir.path + '/build.gradle').exists()
+
+	group='me.chaopeng.chaos4g'
+    project.version = rootProject.v
+
+    repositories {
+        mavenCentral()
+    }
+
+    task initPath {
+        if (isProject) {
+            sourceSets*.groovy.srcDirs*.each { it.mkdirs() }
+            sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+        }
+    }
+
+}

@@ -1,0 +1,1 @@
+include 'chaos4g-ioc', 'chaos4g-tools', 'chaos4g-application'
