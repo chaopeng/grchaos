@@ -4,12 +4,12 @@ import me.chaopeng.chaos4g.summer.aop.annotations.Aspect
 import spock.lang.Specification
 
 /**
- * me.chaopeng.chaos4g.summer.aop.BaseAspectHandlerTest
+ * me.chaopeng.chaos4g.summer.aop.AopHelperTest
  *
  * @author chao
  * @version 1.0 - 2016-06-01
  */
-class BaseAspectHandlerTest extends Specification {
+class AopHelperTest extends Specification {
 
     class UselessAspectHandler implements IAspectHandler{
 
