@@ -51,6 +51,10 @@ class FileWatcher {
         List<File> adds = [];
         List<File> deletes = [];
         List<File> changes = [];
+
+        boolean isEmpty() {
+            adds.isEmpty() && deletes.isEmpty() && changes.isEmpty()
+        }
     }
 
     /**
@@ -94,7 +98,7 @@ class FileWatcher {
     /**
      * @param path will watch
      * @param intervalSecond
-     * @param closure{Changes -> ...}
+     * @param closure {Changes -> ...}
      */
     static void watchDir(String path, int intervalSecond, Closure closure) throws IOException {
         FileWatcher fileWatcher = new FileWatcher(path)
@@ -104,10 +108,13 @@ class FileWatcher {
             // if dir has any changes
             if (fileWatcher.isChange()) {
 
-                try {
-                    closure.call();
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
+                def changes = fileWatcher.changes()
+                if (!changes.isEmpty()) {
+                    try {
+                        closure.call(changes);
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
                 }
             }
 
