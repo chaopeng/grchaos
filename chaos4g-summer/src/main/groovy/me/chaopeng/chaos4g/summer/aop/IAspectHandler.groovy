@@ -7,11 +7,11 @@ package me.chaopeng.chaos4g.summer.aop
  */
 interface IAspectHandler {
 
-    void begin(name, args);
-    void before(name, args);
-    boolean filter(name, args);
-    void end(name, args);
-    void error(name, args, error);
-    void after(name, args);
+    void begin(String name, Object[] args);
+    void before(String name, Object[] args);
+    boolean filter(String name, Object[] args);
+    void end(String name, Object[] args);
+    void error(String name, Object[] args, Throwable error);
+    void after(String name, Object[] args);
 
 }

@@ -1,6 +1,6 @@
 package me.chaopeng.chaos4g.summer.aop
 
-import groovy.util.logging.Slf4j
+import me.chaopeng.chaos4g.summer.aop.annotations.Aspect
 import spock.lang.Specification
 
 /**
@@ -11,42 +11,49 @@ import spock.lang.Specification
  */
 class BaseAspectHandlerTest extends Specification {
 
-    @Slf4j
-    class UselessAspectHandler implements  IAspectHandler{
+    class UselessAspectHandler implements IAspectHandler{
+
+        String log = ""
+
         @Override
-        void begin(name, args) {
-            log.info("begin $name")
+        void begin(String name, Object[] args) {
+            log+="begin,"
         }
 
         @Override
-        void before(name, args) {
-            log.info("before $name")
+        void before(String name, Object[] args) {
+            log+="before,"
         }
 
         @Override
-        boolean filter(name, args) {
-            log.info("filter $name")
+        boolean filter(String name, Object[] args) {
+            log+="filter,"
             return true
         }
 
         @Override
-        void end(name, args) {
-            log.info("end $name")
+        void end(String name, Object[] args) {
+            log+="end,"
         }
 
         @Override
-        void error(name, args, error) {
-            log.error("$name throws error: $error", error)
-            throw error
+        void error(String name, Object[] args, Throwable error) {
+            log+="${error.getMessage()},"
         }
 
         @Override
-        void after(name, args) {
-            log.info("after $name")
+        void after(String name, Object[] args) {
+            log+="after"
         }
     }
 
+    @Aspect(handler = "")
     class UselessClass {
+
+        private privateMethod(){
+
+        }
+
         def nonVoidMethod(){
             return "nonVoidMethod return"
         }
@@ -61,28 +68,36 @@ class BaseAspectHandlerTest extends Specification {
     }
 
     def obj = new UselessClass()
+    def handler = new UselessAspectHandler()
 
     void setup() {
-        AopHelper.install(obj, new UselessAspectHandler())
+        AopHelper.install(obj, handler)
+    }
+
+    def "Invoke private method"() {
+        when:
+        obj.privateMethod()
+        then:
+        handler.log == ""
     }
 
     def "Invoke method with return"() {
         expect:
         obj.nonVoidMethod() == "nonVoidMethod return"
+        handler.log == "begin,filter,before,end,after"
     }
 
     def "Invoke void method"() {
         when:
         obj.voidMethod()
         then:
-        notThrown(Exception)
+        handler.log == "begin,filter,before,end,after"
     }
 
     def "Invoke method with exception"() {
         when:
         obj.exceptionMethod()
         then:
-        def e = thrown(Exception)
-        e.message == "this is an exception"
+        handler.log == "begin,filter,before,this is an exception,after"
     }
 }
