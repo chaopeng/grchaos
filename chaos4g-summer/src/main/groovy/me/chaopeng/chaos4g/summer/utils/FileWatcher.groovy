@@ -3,6 +3,7 @@ package me.chaopeng.chaos4g.summer.utils
 import com.google.common.hash.Hashing
 import groovy.io.FileType
 import groovy.util.logging.Slf4j
+import me.chaopeng.chaos4g.summer.bean.Changes
 
 import java.nio.file.*
 import java.util.concurrent.TimeUnit
@@ -47,22 +48,12 @@ class FileWatcher {
         res
     }
 
-    static class Changes {
-        List<File> adds = [];
-        List<File> deletes = [];
-        List<File> changes = [];
-
-        boolean isEmpty() {
-            adds.isEmpty() && deletes.isEmpty() && changes.isEmpty()
-        }
-    }
-
     /**
      * get the changes files by comparing the MD5
      * @return
      */
-    Changes changes() {
-        Changes res = new Changes()
+    Changes<File> changes() {
+        Changes<File> res = new Changes<>()
         Map<String, String> newMd5s = new HashMap<>()
 
         DirUtils.recursive(dir.path, FileType.FILES).each { file ->
