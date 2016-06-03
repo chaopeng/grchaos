@@ -19,30 +19,30 @@ class SummerClassLoaderTest extends Specification {
     def setup() {
         DirUtils.mkdir("tmp")
 
-        def class2 = '''\
+        def srcClass1 = '''\
 package test
 
-class Class2 {
+class SrcClass1 {
 
-    static class Class2Inner {
+    static class SrcClass1Inner {
 
     }
 
 }
         '''
 
-        def class3 = '''\
+        def srcClass2 = '''\
 package test
 
-class Class3 {
+class SrcClass2 {
 
     def hello(){
         "hello"
     }
 }
 '''
-        Files.write(class2, new File("tmp/Class2.groovy"), Charsets.UTF_8)
-        Files.write(class3, new File("tmp/Class3.groovy"), Charsets.UTF_8)
+        Files.write(srcClass1, new File("tmp/SrcClass1.groovy"), Charsets.UTF_8)
+        Files.write(srcClass2, new File("tmp/SrcClass2.groovy"), Charsets.UTF_8)
 
         scl.init("tmp")
 
@@ -59,72 +59,78 @@ class Class3 {
         scl.findClass(name).name == name
 
         where:
-        name                       | _
-        "test.Class1"              | _
-        "test.Class1\$Class1Inner" | _
-        "test.Class2"              | _
-        "test.Class2\$Class2Inner" | _
-        "test.Class3"              | _
+        name                             | _
+        "test.Class1"                    | _
+        "test.Class1\$Class1Inner"       | _
+        "test.Class2"                    | _
+        "test.p1.Class3"                 | _
+        "test.SrcClass1"                 | _
+        "test.SrcClass1\$SrcClass1Inner" | _
+        "test.SrcClass2"                 | _
 
     }
 
-    def "test Class3 hello"() {
+    def "test Class4 hello"() {
         expect:
-        scl.findClass("test.Class3").newInstance().hello() == "hello"
+        scl.findClass("test.SrcClass2").newInstance().hello() == "hello"
     }
 
     def "test reload file change"() {
-        def class3 = '''\
+        def class4 = '''\
 package test
 
-class Class3 {
+class SrcClass2 {
 
     def hello(){
         "hello2"
     }
 }
 '''
-        Files.write(class3, new File("tmp/Class3.groovy"), Charsets.UTF_8)
+        Files.write(class4, new File("tmp/SrcClass2.groovy"), Charsets.UTF_8)
         Changes<File> changes = new Changes<>()
-        changes.changes.add(new File("tmp/Class3.groovy"))
+        changes.changes.add(new File("tmp/SrcClass2.groovy"))
         scl.reload(changes)
 
         expect:
-        scl.findClass("test.Class3").newInstance().hello() == "hello2"
+        scl.findClass("test.SrcClass2").newInstance().hello() == "hello2"
 
     }
 
     def "test reload new file"() {
-        def class4 = '''\
+        def class5 = '''\
 package test
 
-class Class4 {
+class SrcClass3 {
 
     def hello(){
         "hello2"
     }
 }
 '''
-        Files.write(class4, new File("tmp/Class4.groovy"), Charsets.UTF_8)
+        Files.write(class5, new File("tmp/SrcClass3.groovy"), Charsets.UTF_8)
         Changes<File> changes = new Changes<>()
-        changes.adds.add(new File("tmp/Class4.groovy"))
+        changes.adds.add(new File("tmp/SrcClass3.groovy"))
         scl.reload(changes)
 
         expect:
-        scl.findClass("test.Class4").newInstance().hello() == "hello2"
+        scl.findClass("test.SrcClass3").newInstance().hello() == "hello2"
     }
 
     def "test reload delete file"() {
 
-        DirUtils.rm("tmp/Class3.groovy")
+        DirUtils.rm("tmp/SrcClass2.groovy")
         Changes<File> changes = new Changes<>()
-        changes.deletes.add(new File("tmp/Class3.groovy"))
+        changes.deletes.add(new File("tmp/SrcClass2.groovy"))
         scl.reload(changes)
 
         when:
-        scl.findClass("test.Class3")
+        scl.findClass("test.SrcClass2")
 
         then:
         thrown(ClassNotFoundException)
+    }
+
+    def "test package scan"(){
+        // TODO
     }
 }
