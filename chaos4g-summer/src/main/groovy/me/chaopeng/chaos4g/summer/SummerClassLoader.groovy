@@ -15,15 +15,21 @@ import me.chaopeng.chaos4g.summer.utils.FileWatcher
  */
 @Singleton
 @Slf4j
-class SummerClassLoader extends Observable {
+class SummerClassLoader {
 
     private def gcl = new GroovyClassLoader()
     private String srcRoot;
     private Map<String, List<Class>> fileToClasses = new HashMap<>()
-    private EventBus eventBus;
+    EventBus eventBus;
 
     public synchronized void init(String srcRoot) {
         if (this.srcRoot == null) {
+
+            gcl.class.getDeclaredMethods().each {
+                if (it.name == "removeClassCacheEntry") {
+                    it.setAccessible(true)
+                }
+            }
 
             if (srcRoot == null) {
                 srcRoot = "src/";
@@ -32,7 +38,7 @@ class SummerClassLoader extends Observable {
             this.srcRoot = srcRoot;
 
             new File(srcRoot).eachFileRecurse(FileType.FILES, {
-                if ( it.name.endsWith(".groovy")) {
+                if (it.name.endsWith(".groovy")) {
                     parseClass(it)
                 }
             })
@@ -48,7 +54,7 @@ class SummerClassLoader extends Observable {
     }
 
     public Changes<Class> reload(Changes<File> changes) {
-        Changes<Class> ret = new Changes<>();
+        Changes<Class> ret = new Changes<>()
 
         changes.adds.each {
             ret.adds.addAll(parseClass(it))
@@ -62,11 +68,11 @@ class SummerClassLoader extends Observable {
             ret.deletes.addAll(deleteFile(it))
         }
 
-        return ret;
+        ret
     }
 
     public Set<Class> scanPackage(String basePackage, boolean recursive, boolean includeInner = false) {
-        Set<Class> ret = ClassPathScanner.scan(basePackage, recursive, !includeInner, true, null);
+        Set<Class> ret = ClassPathScanner.scan(basePackage, recursive, !includeInner, true, null)
 
         Map<String, Class> classMap = ret.collectEntries { [it.getName(), it] }
 
@@ -96,7 +102,7 @@ class SummerClassLoader extends Observable {
     public Class findClass(String name) {
         def clazz = gcl.loadClass(name);
         if (clazz == null) {
-            throw new ClassNotFoundException(name);
+            throw new ClassNotFoundException(name)
         }
 
         clazz;
@@ -112,7 +118,7 @@ class SummerClassLoader extends Observable {
         def clazz = gcl.parseClass(new GroovyCodeSource(file, "UTF-8"), false);
 
         // file - classes
-        List<Class> loadedClasses = gcl.getLoadedClasses().findAll {cls ->
+        List<Class> loadedClasses = gcl.getLoadedClasses().findAll { cls ->
             cls.name.startsWith(clazz.name)
         }
 
@@ -129,7 +135,7 @@ class SummerClassLoader extends Observable {
         fileToClasses.remove(file.absolutePath)
     }
 
-    private void unloadClasses(File file){
+    private void unloadClasses(File file) {
         MetaClassRegistry metaClassRegistry = GroovySystem.getMetaClassRegistry();
         fileToClasses.get(file.absolutePath)?.each { clazz ->
             metaClassRegistry.removeMetaClass(clazz)
