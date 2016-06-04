@@ -10,7 +10,7 @@ import spock.lang.Specification
  */
 class ClassPathScannerTest extends Specification {
 
-    def "test scan"() {
+    def "scan"() {
 
         expect:
         ClassPathScanner.scan("test", recursive, excludeInner, true).collect { it.simpleName }.sort() == classes.sort()
@@ -23,7 +23,7 @@ class ClassPathScannerTest extends Specification {
 
     }
 
-    def "test scan with regex"() {
+    def "scan with regex"() {
 
         expect:
         ClassPathScanner.scan("test", true, false, checkInOrEx, regex).collect {

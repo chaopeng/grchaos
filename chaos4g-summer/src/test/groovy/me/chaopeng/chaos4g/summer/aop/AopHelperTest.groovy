@@ -74,27 +74,27 @@ class AopHelperTest extends Specification {
         AopHelper.install(obj, handler)
     }
 
-    def "Invoke private method"() {
+    def "invoke private method"() {
         when:
         obj.privateMethod()
         then:
         handler.log == ""
     }
 
-    def "Invoke method with return"() {
+    def "invoke method with return"() {
         expect:
         obj.nonVoidMethod() == "nonVoidMethod return"
         handler.log == "begin,filter,before,end,after"
     }
 
-    def "Invoke void method"() {
+    def "invoke void method"() {
         when:
         obj.voidMethod()
         then:
         handler.log == "begin,filter,before,end,after"
     }
 
-    def "Invoke method with exception"() {
+    def "invoke method with exception"() {
         when:
         obj.exceptionMethod()
         then:

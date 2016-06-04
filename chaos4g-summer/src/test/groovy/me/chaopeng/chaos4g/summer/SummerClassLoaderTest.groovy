@@ -56,7 +56,7 @@ class SrcClass2 {
         tmp.deleteDir();
     }
 
-    def "test init & find"() {
+    def "init & find"() {
 
         expect:
         scl.findClass(name).name == name
@@ -74,12 +74,12 @@ class SrcClass2 {
 
     }
 
-    def "test Class4 hello"() {
+    def "Class4 hello"() {
         expect:
         scl.findClass("test.SrcClass2").newInstance().hello() == "hello"
     }
 
-    def "test reload file change"() {
+    def "reload file change"() {
 
         def old = scl.findClass("test.SrcClass2").newInstance()
         def class4 = '''\
@@ -103,7 +103,7 @@ class SrcClass2 {
 
     }
 
-    def "test reload new file"() {
+    def "reload new file"() {
         def class5 = '''\
 package test
 
@@ -123,7 +123,7 @@ class SrcClass3 {
         scl.findClass("test.SrcClass3").newInstance().hello() == "hello2"
     }
 
-    def "test reload delete file"() {
+    def "reload delete file"() {
 
         File srcClass2 = new File("tmp/SrcClass2.groovy")
         DirUtils.rm("tmp/SrcClass2.groovy")
@@ -141,7 +141,7 @@ class SrcClass3 {
         !scl.fileToClasses.containsKey(srcClass2.absolutePath)
     }
 
-    def "test package scan"() {
+    def "package scan"() {
 
         expect:
         scl.scanPackage("test", recursive, excludeInner).collect { it.simpleName }.sort() == classes.sort()

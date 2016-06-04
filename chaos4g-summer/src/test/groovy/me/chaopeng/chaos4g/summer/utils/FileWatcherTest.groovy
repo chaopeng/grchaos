@@ -36,7 +36,7 @@ class FileWatcherTest extends Specification {
         tmp.deleteDir();
     }
 
-    def "test change when create"() {
+    def "change when create"() {
         when:
         Files.touch(new File("tmp/4.txt"))
 
@@ -44,7 +44,7 @@ class FileWatcherTest extends Specification {
         watcher.isChange()
     }
 
-    def "test change when touch"() {
+    def "change when touch"() {
         when:
         Files.touch(new File("tmp"))
 
@@ -52,7 +52,7 @@ class FileWatcherTest extends Specification {
         watcher.isChange()
     }
 
-    def "test get changes - no change"() {
+    def "get changes - no change"() {
         when:
         Files.touch(new File("tmp"))
 
@@ -64,7 +64,7 @@ class FileWatcherTest extends Specification {
         changes.changes.isEmpty()
     }
 
-    def "test get changes"() {
+    def "get changes"() {
         when:
         Files.write("4", new File("tmp/4.txt"), Charsets.UTF_8) // new 4
         DirUtils.rm("tmp/1.txt")
