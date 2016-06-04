@@ -13,14 +13,13 @@ import me.chaopeng.chaos4g.summer.utils.FileWatcher
  * @author chao
  * @version 1.0 - 2016-06-01
  */
-@Singleton
 @Slf4j
 class SummerClassLoader {
 
     private def gcl = new GroovyClassLoader()
     private String srcRoot;
     private Map<String, List<Class>> fileToClasses = new HashMap<>()
-    EventBus eventBus;
+    EventBus eventBus = new EventBus();
 
     public synchronized void init(String srcRoot) {
         if (this.srcRoot == null) {
@@ -68,11 +67,13 @@ class SummerClassLoader {
             ret.deletes.addAll(deleteFile(it))
         }
 
+        eventBus.post(ret)
+
         ret
     }
 
-    public Set<Class> scanPackage(String basePackage, boolean recursive, boolean includeInner = false) {
-        Set<Class> ret = ClassPathScanner.scan(basePackage, recursive, !includeInner, true, null)
+    public Set<Class> scanPackage(String basePackage, boolean recursive, boolean excludeInner = true) {
+        Set<Class> ret = ClassPathScanner.scan(basePackage, recursive, excludeInner, true, null)
 
         Map<String, Class> classMap = ret.collectEntries { [it.getName(), it] }
 
@@ -83,12 +84,12 @@ class SummerClassLoader {
             if (name.startsWith(prefix)) {
                 if (!recursive) {
                     if (!name.replace(prefix, "").contains(".")) {
-                        if (includeInner || !name.contains("\$")) {
+                        if (!excludeInner || !name.contains("\$")) {
                             classMap.put(clazz.getName(), clazz)
                         }
                     }
                 } else {
-                    if (includeInner || !name.contains("\$")) {
+                    if (!excludeInner || !name.contains("\$")) {
                         classMap.put(clazz.getName(), clazz)
                     }
                 }

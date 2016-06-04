@@ -14,9 +14,12 @@ import spock.lang.Specification
  */
 class SummerClassLoaderTest extends Specification {
 
-    def scl = SummerClassLoader.instance
+    def scl
 
     def setup() {
+
+        scl = new SummerClassLoader()
+
         DirUtils.mkdir("tmp")
 
         def srcClass1 = '''\
@@ -57,6 +60,7 @@ class SrcClass2 {
 
         expect:
         scl.findClass(name).name == name
+        scl.findClass(name) == scl.findClass(name)
 
         where:
         name                             | _
@@ -76,6 +80,8 @@ class SrcClass2 {
     }
 
     def "test reload file change"() {
+
+        def old = scl.findClass("test.SrcClass2").newInstance()
         def class4 = '''\
 package test
 
@@ -93,6 +99,7 @@ class SrcClass2 {
 
         expect:
         scl.findClass("test.SrcClass2").newInstance().hello() == "hello2"
+        old.hello() == "hello"
 
     }
 
@@ -118,19 +125,32 @@ class SrcClass3 {
 
     def "test reload delete file"() {
 
+        File srcClass2 = new File("tmp/SrcClass2.groovy")
         DirUtils.rm("tmp/SrcClass2.groovy")
         Changes<File> changes = new Changes<>()
-        changes.deletes.add(new File("tmp/SrcClass2.groovy"))
+        changes.deletes.add(srcClass2)
         scl.reload(changes)
+
+        scl.class.getDeclaredField("fileToClasses").accessible = true
 
         when:
         scl.findClass("test.SrcClass2")
 
         then:
         thrown(ClassNotFoundException)
+        !scl.fileToClasses.containsKey(srcClass2.absolutePath)
     }
 
-    def "test package scan"(){
-        // TODO
+    def "test package scan"() {
+
+        expect:
+        scl.scanPackage("test", recursive, excludeInner).collect { it.simpleName }.sort() == classes.sort()
+
+        where:
+        recursive | excludeInner | classes
+        true      | true         | ["Class1", "Class2", "Class3", "SrcClass1", "SrcClass2"]
+        true      | false        | ["Class1", "Class1Inner", "Class3", "Class2", "SrcClass1", "SrcClass1Inner", "SrcClass2"]
+        false     | false        | ["Class1", "Class1Inner", "Class2", "SrcClass1", "SrcClass1Inner", "SrcClass2"]
+
     }
 }
