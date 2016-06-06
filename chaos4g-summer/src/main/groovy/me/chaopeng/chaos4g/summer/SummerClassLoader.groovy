@@ -4,6 +4,8 @@ import com.google.common.eventbus.EventBus
 import groovy.io.FileType
 import groovy.util.logging.Slf4j
 import me.chaopeng.chaos4g.summer.bean.Changes
+import me.chaopeng.chaos4g.summer.event.ClassChanges
+import me.chaopeng.chaos4g.summer.excwptions.SummerException
 import me.chaopeng.chaos4g.summer.utils.ClassPathScanner
 import me.chaopeng.chaos4g.summer.utils.FileWatcher
 
@@ -19,41 +21,70 @@ class SummerClassLoader {
     private def gcl = new GroovyClassLoader()
     private String srcRoot;
     private Map<String, List<Class>> fileToClasses = new HashMap<>()
+    private FileWatcher fileWatcher
     EventBus eventBus = new EventBus();
 
-    public synchronized void init(String srcRoot) {
+    private SummerClassLoader() {
+    }
+
+    static SummerClassLoader create(String srcRoot, boolean autoReload = false) {
+        def scl = new SummerClassLoader()
+        if (srcRoot != null) {
+            scl.loadSrc(srcRoot, autoReload)
+        }
+        scl
+    }
+
+    public synchronized void loadSrc(String srcRoot, boolean autoReload) {
         if (this.srcRoot == null) {
 
-            gcl.class.getDeclaredMethods().each {
-                if (it.name == "removeClassCacheEntry") {
-                    it.setAccessible(true)
+            try {
+                gcl.class.getDeclaredMethods().each {
+                    if (it.name == "removeClassCacheEntry") {
+                        it.setAccessible(true)
+                    }
                 }
-            }
 
-            if (srcRoot == null) {
-                srcRoot = "src/";
-            }
-
-            this.srcRoot = srcRoot;
-
-            new File(srcRoot).eachFileRecurse(FileType.FILES, {
-                if (it.name.endsWith(".groovy")) {
-                    parseClass(it)
+                if (srcRoot == null) {
+                    srcRoot = "src/";
                 }
-            })
 
-            // setup file system watch service
-            FileWatcher.watchDir(srcRoot, 60, {
-                it ->
-                    def changes = reload(it as Changes<File>)
-                    eventBus.post(changes)
-            })
+                this.srcRoot = srcRoot;
 
+                new File(srcRoot).eachFileRecurse(FileType.FILES, {
+                    if (it.name.endsWith(".groovy")) {
+                        parseClass(it)
+                    }
+                })
+
+                // setup file system watch service
+                if (autoReload) {
+                    FileWatcher.watchDir(srcRoot, 60, {
+                        it ->
+                            def changes = reload(it as Changes<File>)
+                            eventBus.post(changes)
+                    })
+                } else {
+                    fileWatcher = new FileWatcher(srcRoot)
+                }
+            } catch (Exception e) {
+                throw new SummerException(e)
+            }
         }
     }
 
-    public Changes<Class> reload(Changes<File> changes) {
-        Changes<Class> ret = new Changes<>()
+    public ClassChanges reload(Changes<File> changes = null) {
+
+        if (changes == null) {
+            if (fileWatcher.isChange()) {
+                changes = fileWatcher.changes()
+                if (changes.isEmpty()) {
+                    return null
+                }
+            }
+        }
+
+        ClassChanges ret = new ClassChanges()
 
         changes.adds.each {
             ret.adds.addAll(parseClass(it))
@@ -101,9 +132,9 @@ class SummerClassLoader {
 
 
     public Class findClass(String name) {
-        def clazz = gcl.loadClass(name);
+        def clazz = gcl.loadedClasses.find{it.name == name}
         if (clazz == null) {
-            throw new ClassNotFoundException(name)
+            clazz = Class.forName(name)
         }
 
         clazz;

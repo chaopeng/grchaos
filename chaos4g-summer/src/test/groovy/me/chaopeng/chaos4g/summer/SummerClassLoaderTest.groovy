@@ -2,7 +2,6 @@ package me.chaopeng.chaos4g.summer
 
 import com.google.common.base.Charsets
 import com.google.common.io.Files
-import me.chaopeng.chaos4g.summer.bean.Changes
 import me.chaopeng.chaos4g.summer.utils.DirUtils
 import spock.lang.Specification
 
@@ -17,8 +16,6 @@ class SummerClassLoaderTest extends Specification {
     def scl
 
     def setup() {
-
-        scl = new SummerClassLoader()
 
         DirUtils.mkdir("tmp")
 
@@ -47,8 +44,7 @@ class SrcClass2 {
         Files.write(srcClass1, new File("tmp/SrcClass1.groovy"), Charsets.UTF_8)
         Files.write(srcClass2, new File("tmp/SrcClass2.groovy"), Charsets.UTF_8)
 
-        scl.init("tmp")
-
+        scl = SummerClassLoader.create("tmp")
     }
 
     def cleanup() {
@@ -93,9 +89,8 @@ class SrcClass2 {
 }
 '''
         Files.write(class4, new File("tmp/SrcClass2.groovy"), Charsets.UTF_8)
-        Changes<File> changes = new Changes<>()
-        changes.changes.add(new File("tmp/SrcClass2.groovy"))
-        scl.reload(changes)
+
+        scl.reload()
 
         expect:
         scl.findClass("test.SrcClass2").newInstance().hello() == "hello2"
@@ -115,9 +110,7 @@ class SrcClass3 {
 }
 '''
         Files.write(class5, new File("tmp/SrcClass3.groovy"), Charsets.UTF_8)
-        Changes<File> changes = new Changes<>()
-        changes.adds.add(new File("tmp/SrcClass3.groovy"))
-        scl.reload(changes)
+        scl.reload()
 
         expect:
         scl.findClass("test.SrcClass3").newInstance().hello() == "hello2"
@@ -127,9 +120,7 @@ class SrcClass3 {
 
         File srcClass2 = new File("tmp/SrcClass2.groovy")
         DirUtils.rm("tmp/SrcClass2.groovy")
-        Changes<File> changes = new Changes<>()
-        changes.deletes.add(srcClass2)
-        scl.reload(changes)
+        scl.reload()
 
         scl.class.getDeclaredField("fileToClasses").accessible = true
 
