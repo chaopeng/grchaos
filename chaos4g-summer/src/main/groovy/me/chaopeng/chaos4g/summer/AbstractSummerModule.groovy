@@ -11,8 +11,10 @@ abstract class AbstractSummerModule {
 
     protected Summer summer
 
-    abstract void configure()
-    abstract void start()
-    abstract void stop()
+    protected abstract void configure()
+    protected abstract void start()
+    protected abstract void stop()
+
+
 
 }
