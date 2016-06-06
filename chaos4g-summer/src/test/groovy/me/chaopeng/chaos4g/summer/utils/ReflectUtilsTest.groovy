@@ -5,6 +5,9 @@ import me.chaopeng.chaos4g.summer.ioc.annotations.Inject
 import spock.lang.Specification
 import test.Class1
 
+import java.lang.reflect.Field
+import java.lang.reflect.Method
+
 /**
  * me.chaopeng.chaos4g.summer.utils.ReflectUtilsTest
  *
@@ -13,9 +16,17 @@ import test.Class1
  */
 class ReflectUtilsTest extends Specification {
 
+    Method getMethodByName(Object object, String name) {
+        return object.class.declaredMethods.find {name == it.name}
+    }
+
+    Field getFieldByName(Object object, String name) {
+        return object.class.declaredFields.find {name == it.name}
+    }
+
     def "get methods by annotation"() {
         expect:
-        ReflectUtils.getMethodsByAnnotation(new Class1.Class1Inner(), AspectMe.class).collect {it.name}.sort() == ["a", "b", "b"].sort()
+        ReflectUtils.getMethodsByAnnotation(new Class1.Class1Inner(), AspectMe.class).collect {it.name}.sort() == ["a", "b", "c"].sort()
     }
 
     def "GetFieldsByAnnotation"() {
@@ -27,17 +38,18 @@ class ReflectUtilsTest extends Specification {
         def obj = new Class1.Class1Inner()
 
         expect:
-        ReflectUtils.callMethod(obj, obj.class.declaredMethods.find{it.name == "a"}, null) == 1
-        ReflectUtils.callMethod(obj, obj.class.declaredMethods.find{it.name == "b"}, 1) == 1
-        ReflectUtils.callMethod(obj, obj.class.declaredMethods.find{it.name == "b"}, "ss") == "ss"
+        ReflectUtils.callMethod(obj, getMethodByName(obj, "a"), null) == 1
+        ReflectUtils.callMethod(obj, getMethodByName(obj, "b"), 1) == 1
+        ReflectUtils.callMethod(obj, getMethodByName(obj, "c"), "ss") == "ss"
     }
 
     def "get set field"() {
         def obj = new Class1.Class1Inner()
+        def field = getFieldByName(obj, "i1")
 
         expect:
-        ReflectUtils.setField(obj, obj.class.declaredFields.find {it.name == "i1"}, 1)
-        ReflectUtils.getField(obj, obj.class.declaredFields.find {it.name == "i1"}) == 1
+        ReflectUtils.setField(obj, field, 1)
+        ReflectUtils.getField(obj, field) == 1
 
     }
 }

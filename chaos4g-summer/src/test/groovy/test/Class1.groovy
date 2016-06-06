@@ -23,7 +23,7 @@ class Class1 {
         }
 
         @AspectMe
-        private def b(def i){
+        private def c(def i){
             return i
         }
     }
