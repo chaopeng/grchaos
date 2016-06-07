@@ -4,6 +4,7 @@ import com.google.common.eventbus.EventBus
 import groovy.io.FileType
 import groovy.util.logging.Slf4j
 import me.chaopeng.chaos4g.summer.bean.Changes
+import me.chaopeng.chaos4g.summer.bean.PackageScan
 import me.chaopeng.chaos4g.summer.event.ClassChanges
 import me.chaopeng.chaos4g.summer.excwptions.SummerException
 import me.chaopeng.chaos4g.summer.utils.ClassPathScanner
@@ -103,27 +104,15 @@ class SummerClassLoader {
         ret
     }
 
-    public Set<Class> scanPackage(String basePackage, boolean recursive, boolean excludeInner = true) {
-        Set<Class> ret = ClassPathScanner.scan(basePackage, recursive, excludeInner, true, null)
+    public Set<Class> scanPackage(PackageScan packageScan) {
+        Set<Class> ret = ClassPathScanner.scan(packageScan)
 
         Map<String, Class> classMap = ret.collectEntries { [it.getName(), it] }
 
-        def prefix = basePackage + "."
-
         gcl.getLoadedClasses().each { clazz ->
             def name = clazz.getName()
-            if (name.startsWith(prefix)) {
-                if (!recursive) {
-                    if (!name.replace(prefix, "").contains(".")) {
-                        if (!excludeInner || !name.contains("\$")) {
-                            classMap.put(clazz.getName(), clazz)
-                        }
-                    }
-                } else {
-                    if (!excludeInner || !name.contains("\$")) {
-                        classMap.put(clazz.getName(), clazz)
-                    }
-                }
+            if (ClassPathScanner.filter(name, packageScan)) {
+                classMap.put(clazz.getName(), clazz)
             }
         }
 
@@ -132,7 +121,7 @@ class SummerClassLoader {
 
 
     public Class findClass(String name) {
-        def clazz = gcl.loadedClasses.find{it.name == name}
+        def clazz = gcl.loadedClasses.find { it.name == name }
         if (clazz == null) {
             clazz = Class.forName(name)
         }

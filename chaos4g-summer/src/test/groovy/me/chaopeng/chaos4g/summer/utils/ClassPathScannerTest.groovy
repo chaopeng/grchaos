@@ -1,5 +1,6 @@
 package me.chaopeng.chaos4g.summer.utils
 
+import me.chaopeng.chaos4g.summer.bean.PackageScan
 import spock.lang.Specification
 
 /**
@@ -13,7 +14,9 @@ class ClassPathScannerTest extends Specification {
     def "scan"() {
 
         expect:
-        ClassPathScanner.scan("test", recursive, excludeInner, true).collect { it.simpleName }.sort() == classes.sort()
+        ClassPathScanner.scan(
+                PackageScan.builder().packageName("test").recursive(recursive).excludeInner(excludeInner).build(), true)
+                .collect { it.simpleName }.sort() == classes.sort()
 
         where:
         recursive | excludeInner | classes

@@ -3,6 +3,8 @@ package me.chaopeng.chaos4g.summer
 import com.google.common.base.CaseFormat
 import com.google.common.eventbus.EventBus
 import groovy.util.logging.Slf4j
+import me.chaopeng.chaos4g.summer.bean.NamedBean
+import me.chaopeng.chaos4g.summer.bean.PackageScan
 import me.chaopeng.chaos4g.summer.excwptions.SummerException
 import me.chaopeng.chaos4g.summer.ioc.annotations.Bean
 
@@ -21,7 +23,8 @@ class Summer {
     private EventBus eventBus
     private Map<String, Object> namedBeans = new HashMap<>()
     private List<WeakReference<Object>> anonymousBeans = new LinkedList<>()
-    private List<String> watchPackages = new LinkedList<>()
+    private List<PackageScan> watchPackages = new LinkedList<>()
+    private Set<String> watchClasses = new HashSet<>()
     private AbstractSummerModule module
     private boolean isInit = false
 
@@ -32,7 +35,11 @@ class Summer {
         eventBus.register(this)
     }
 
-    synchronized void loadModule(AbstractSummerModule module){
+    ////////////////////////////////////
+    // Life Cycle
+    ////////////////////////////////////
+
+    synchronized void loadModule(AbstractSummerModule module) {
         if (!isInit) {
             this.module = module
             module.summer = this
@@ -41,33 +48,50 @@ class Summer {
         }
     }
 
-    synchronized void start(){
+    synchronized void start() {
+        doInject()
+        doinitializate()
         module.start()
     }
 
-    synchronized void stop(){
+    synchronized void stop() {
         module.stop()
     }
 
-    public void bean(String name, Object object, boolean isUpgrade=false) {
+    private void doInject(){
+
+    }
+
+    private void doinitializate(){
+
+    }
+
+    ////////////////////////////////////
+    // bean define
+    ////////////////////////////////////
+
+    public NamedBean bean(String name, Object object, boolean isUpgrade = false) {
         synchronized (this) {
 
-            // do upgrade
+            // check upgrade
             def oldBean = namedBeans.get(name)
-            if (oldBean!=null) {
+            if (oldBean != null) {
                 if (!isUpgrade) {
                     throw new SummerException("Bean ${name} is duplicated. ")
                 }
             }
 
+            // put into map only if !isUpgrade
             if (!isUpgrade) {
                 namedBeans.put(name, object)
             }
+
+            return NamedBean.builder().name(name).object(object).build()
         }
     }
 
-    public String bean(Object object, boolean isUpgrade=false) {
-        Bean bean = object.getClass().getAnnotation(Bean.class);
+    public NamedBean bean(Object object, boolean isUpgrade = false) {
+        Bean bean = object.class.getAnnotation(Bean.class)
         if (bean != null) {
             String name
             if (!bean.value().isEmpty()) {
@@ -75,32 +99,38 @@ class Summer {
             } else {
                 name = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, object.class.simpleName)
             }
-            this.bean(name, object, isUpgrade);
-            name;
+            watchClasses.add(object.class.name)
+            return this.bean(name, object, isUpgrade)
         }
-        log.warn("Cannot find @Bean in ${object.getClass()}. ignore it. ");
-        null;
+        return null
     }
 
-    public String bean(Class clazz, boolean isUpgrade=false) {
-        def o = clazz.newInstance();
-        return bean(o, isUpgrade);
+    public NamedBean beanFromClass(Class clazz, boolean isUpgrade = false) {
+        def o = clazz.newInstance()
+        return bean(o, isUpgrade)
     }
 
-    public void beans(List list) {
-        list.each {
-            if(it instanceof Map){
-                it.each { k, v -> bean(k as String, v); }
-            } else if (it instanceof PackageScan) {
-                loadPackage(it);
-            } else if (it instanceof Collection<Class<?>>) {
-                loadClasses(it);
-            } else if (it instanceof ClassFor) {
-                loadClass(it.name);
-            }
-            else {
-                addBean(it);
-            }
+    public NamedBean beanFromClassName(String className, boolean isUpgrade = false) {
+        return beanFromClass(classLoader.findClass(className), isUpgrade)
+    }
+
+    public Map<String, Object> beansFromClasses(List<Class> classes, boolean isUpgrade = false) {
+        return classes.findResults {
+            beanFromClass(it, isUpgrade)
+        }.collectEntries {
+            [(it.name): it.object]
         }
     }
+
+    public Map<String, Object> beansFromPackage(PackageScan packageScan, boolean isUpgrade = false) {
+        if (!isUpgrade) {
+            watchPackages.add(packageScan)
+        }
+        List<Class> classes = classLoader.scanPackage(packageScan).toList()
+        return beansFromClasses(classes, isUpgrade)
+    }
+
+    ////////////////////////////////////
+    // get bean
+    ////////////////////////////////////
 }

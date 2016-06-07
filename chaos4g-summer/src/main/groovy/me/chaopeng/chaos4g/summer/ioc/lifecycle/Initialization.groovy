@@ -8,6 +8,6 @@ package me.chaopeng.chaos4g.summer.ioc.lifecycle
  */
 interface Initialization {
 
-    void initialization()
+    void initializate()
 
 }

@@ -1,6 +1,7 @@
 package me.chaopeng.chaos4g.summer.utils
 
 import groovy.util.logging.Slf4j
+import me.chaopeng.chaos4g.summer.bean.PackageScan
 
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -15,6 +16,27 @@ import java.util.regex.Pattern
 @Slf4j
 class ClassPathScanner {
 
+    public static boolean filter(String name, PackageScan scanner) {
+        String prefix = scanner.packageName + "."
+
+        if (name.startsWith(prefix)) {
+            if (!scanner.recursive) {
+                return !name.replace(prefix, "").contains(".") ?
+                        !scanner.excludeInner || !name.contains("\$")
+                        : false
+            } else {
+                return !scanner.excludeInner || !name.contains("\$")
+            }
+        } else {
+            return false
+        }
+    }
+
+
+    public static Set<Class> scan(PackageScan packageScan, boolean checkInOrEx = true, Pattern regex = null) {
+        return scan(packageScan.packageName, packageScan.recursive, packageScan.excludeInner, checkInOrEx, regex)
+    }
+
     /**
      *
      * @param basePackage
@@ -24,8 +46,8 @@ class ClassPathScanner {
      * @param regex
      * @return Set
      */
-    public static Set<Class> scan(String basePackage, boolean recursive, boolean excludeInner, boolean checkInOrEx,
-                                  Pattern regex = null) {
+    public
+    static Set<Class> scan(String basePackage, boolean recursive, boolean excludeInner, boolean checkInOrEx = true, Pattern regex = null) {
         Set<Class<?>> classes = new LinkedHashSet<Class>()
         String packageName = basePackage
 

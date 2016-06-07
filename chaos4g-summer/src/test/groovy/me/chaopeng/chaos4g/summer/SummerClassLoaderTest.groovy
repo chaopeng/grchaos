@@ -2,6 +2,7 @@ package me.chaopeng.chaos4g.summer
 
 import com.google.common.base.Charsets
 import com.google.common.io.Files
+import me.chaopeng.chaos4g.summer.bean.PackageScan
 import me.chaopeng.chaos4g.summer.utils.DirUtils
 import spock.lang.Specification
 
@@ -135,7 +136,8 @@ class SrcClass3 {
     def "package scan"() {
 
         expect:
-        scl.scanPackage("test", recursive, excludeInner).collect { it.simpleName }.sort() == classes.sort()
+        scl.scanPackage(PackageScan.builder().packageName("test").recursive(recursive).excludeInner(excludeInner).build())
+                .collect { it.simpleName }.sort() == classes.sort()
 
         where:
         recursive | excludeInner | classes

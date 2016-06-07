@@ -6,6 +6,6 @@ package me.chaopeng.chaos4g.summer.ioc.lifecycle
  * @author chao
  * @version 1.0 - 2016-06-02
  */
-interface LifeCycleHandler extends Initialization, Upgrade, Destroy {
+interface LifeCycleHandler extends Initialization, Destroy {
 
 }
