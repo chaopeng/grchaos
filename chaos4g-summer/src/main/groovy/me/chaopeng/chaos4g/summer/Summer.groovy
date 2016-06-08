@@ -7,6 +7,9 @@ import me.chaopeng.chaos4g.summer.bean.NamedBean
 import me.chaopeng.chaos4g.summer.bean.PackageScan
 import me.chaopeng.chaos4g.summer.excwptions.SummerException
 import me.chaopeng.chaos4g.summer.ioc.annotations.Bean
+import me.chaopeng.chaos4g.summer.ioc.annotations.Inject
+import me.chaopeng.chaos4g.summer.ioc.lifecycle.Initialization
+import me.chaopeng.chaos4g.summer.utils.ReflectUtils
 
 import java.lang.ref.WeakReference
 
@@ -54,6 +57,10 @@ class Summer {
         module.start()
     }
 
+    synchronized void upgrade() {
+
+    }
+
     synchronized void stop() {
         module.stop()
     }
@@ -62,8 +69,28 @@ class Summer {
 
     }
 
-    private void doinitializate() {
+    private void doInject(Object object, Map m=namedBeans, boolean isUpgrade=false){
+        def fields = ReflectUtils.getFieldsByAnnotation(object, Inject.class)
+        fields.each { field ->
+            def inject = field.getAnnotation(Inject.class)
+            def name = inject.value().isEmpty() ? field.getName() : inject.value()
+            def bean = m.get(name)
+            if (bean == null) {
+                throw new SummerException("no bean named $name")
+            } else {
+                ReflectUtils.setField(object, field, bean)
+            }
+        }
+    }
 
+    private void doinitializate(){
+
+    }
+
+    private void doinitializate(Object object) {
+        if (object in Initialization) {
+            (object as Initialization).initializate()
+        }
     }
 
     ////////////////////////////////////
