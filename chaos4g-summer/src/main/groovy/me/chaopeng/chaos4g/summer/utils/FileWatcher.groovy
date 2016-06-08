@@ -5,6 +5,7 @@ import groovy.io.FileType
 import groovy.util.logging.Slf4j
 import me.chaopeng.chaos4g.summer.bean.Changes
 import rx.Observable
+import rx.schedulers.Schedulers
 
 import java.nio.file.*
 import java.util.concurrent.TimeUnit
@@ -60,7 +61,7 @@ class FileWatcher {
         DirUtils.recursive(dir.path, FileType.FILES).each { file ->
             def md5 = com.google.common.io.Files.hash(file, Hashing.md5()).toString()
 
-            // new 
+            // new
             if (!md5s.containsKey(file.path)) {
                 res.adds.add(file)
             }
@@ -90,12 +91,12 @@ class FileWatcher {
     /**
      * @param path will watch
      * @param intervalSecond
-     * @param closure {Changes -> ...}
+     * @param closure{Changes -> ...}
      */
-    static void watchDir(String path, int intervalSecond, Closure closure) throws IOException {
+    static FileWatcher watchDir(String path, int intervalSecond, Closure closure) throws IOException {
         FileWatcher fileWatcher = new FileWatcher(path)
 
-        Observable.interval(intervalSecond, intervalSecond, TimeUnit.SECONDS).subscribe{
+        Observable.interval(intervalSecond, intervalSecond, TimeUnit.SECONDS).observeOn(Schedulers.newThread()).subscribe{
 
             // if dir has any changes
             if (fileWatcher.isChange()) {
@@ -110,6 +111,8 @@ class FileWatcher {
                 }
             }
         }
+
+        fileWatcher
     }
 
 

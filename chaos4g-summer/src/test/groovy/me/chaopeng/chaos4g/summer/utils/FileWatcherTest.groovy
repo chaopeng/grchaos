@@ -33,7 +33,7 @@ class FileWatcherTest extends Specification {
 
     def cleanup(){
         def tmp = new File("tmp")
-        tmp.deleteDir();
+        tmp.deleteDir()
     }
 
     def "change when create"() {
@@ -46,6 +46,7 @@ class FileWatcherTest extends Specification {
 
     def "change when touch"() {
         when:
+        sleep(1000)
         Files.touch(new File("tmp"))
 
         then:
@@ -54,6 +55,7 @@ class FileWatcherTest extends Specification {
 
     def "get changes - no change"() {
         when:
+        sleep(1000)
         Files.touch(new File("tmp"))
 
         then:

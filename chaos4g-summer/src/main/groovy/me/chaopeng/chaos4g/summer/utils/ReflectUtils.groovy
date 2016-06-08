@@ -12,15 +12,14 @@ import java.lang.reflect.Method
  */
 class ReflectUtils {
 
-    public static List<Method> getMethodsByAnnotation(Object o, Class annotation) {
+    static List<Method> getMethodsByAnnotation(Object o, Class annotation) {
         return o.class.getDeclaredMethods().findAll { it.getAnnotation(annotation) != null }
     }
 
-    public static List<Field> getFieldsByAnnotation(Object o, Class annotation) {
+    static List<Field> getFieldsByAnnotation(Object o, Class annotation) {
         return o.class.getDeclaredFields().findAll { it.getAnnotation(annotation) != null }
     }
 
-    public
     static Object callMethod(Object o, Method method, Object... args) throws IllegalAccessException, InvocationTargetException {
         boolean accessible = method.isAccessible()
         try {
@@ -31,7 +30,7 @@ class ReflectUtils {
         }
     }
 
-    public static void setField(Object o, Field field, Object val) throws IllegalAccessException {
+    static void setField(Object o, Field field, Object val) throws IllegalAccessException {
         boolean accessible = field.isAccessible()
         try {
             field.setAccessible(true)
@@ -41,7 +40,7 @@ class ReflectUtils {
         }
     }
 
-    public static Object getField(Object o, Field field) throws IllegalAccessException {
+    static Object getField(Object o, Field field) throws IllegalAccessException {
         boolean accessible = field.isAccessible()
         try {
             field.setAccessible(true)

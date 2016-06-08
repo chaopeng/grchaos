@@ -8,9 +8,9 @@ package me.chaopeng.chaos4g.summer.bean
  */
 class Changes<T> {
 
-    List<T> adds = [];
-    List<T> deletes = [];
-    List<T> changes = [];
+    List<T> adds = []
+    List<T> deletes = []
+    List<T> changes = []
 
     boolean isEmpty() {
         adds.isEmpty() && deletes.isEmpty() && changes.isEmpty()

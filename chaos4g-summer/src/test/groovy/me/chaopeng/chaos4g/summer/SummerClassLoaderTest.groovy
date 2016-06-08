@@ -77,6 +77,7 @@ class SrcClass2 {
     }
 
     def "reload file change"() {
+        sleep(1000)
 
         def old = scl.findClass("test.SrcClass2").newInstance()
         def class4 = '''\
@@ -100,6 +101,8 @@ class SrcClass2 {
     }
 
     def "reload new file"() {
+        sleep(1000)
+
         def class5 = '''\
 package test
 
@@ -118,6 +121,7 @@ class SrcClass3 {
     }
 
     def "reload delete file"() {
+        sleep(1000)
 
         File srcClass2 = new File("tmp/SrcClass2.groovy")
         DirUtils.rm("tmp/SrcClass2.groovy")

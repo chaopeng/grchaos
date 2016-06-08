@@ -8,6 +8,7 @@ import me.chaopeng.chaos4g.summer.bean.PackageScan
 import me.chaopeng.chaos4g.summer.event.ClassChanges
 import me.chaopeng.chaos4g.summer.excwptions.SummerException
 import me.chaopeng.chaos4g.summer.utils.ClassPathScanner
+import me.chaopeng.chaos4g.summer.utils.DirUtils
 import me.chaopeng.chaos4g.summer.utils.FileWatcher
 
 /**
@@ -26,6 +27,11 @@ class SummerClassLoader {
     EventBus eventBus = new EventBus();
 
     private SummerClassLoader() {
+        gcl.class.getDeclaredMethods().each {
+            if (it.name == "removeClassCacheEntry") {
+                it.setAccessible(true)
+            }
+        }
     }
 
     static SummerClassLoader create(String srcRoot, boolean autoReload = false) {
@@ -36,34 +42,26 @@ class SummerClassLoader {
         scl
     }
 
-    public synchronized void loadSrc(String srcRoot, boolean autoReload) {
+    synchronized void loadSrc(String srcRoot, boolean autoReload) {
         if (this.srcRoot == null) {
 
             try {
-                gcl.class.getDeclaredMethods().each {
-                    if (it.name == "removeClassCacheEntry") {
-                        it.setAccessible(true)
-                    }
-                }
 
                 if (srcRoot == null) {
-                    srcRoot = "src/";
+                    this.srcRoot = "src/";
                 }
 
                 this.srcRoot = srcRoot;
 
-                new File(srcRoot).eachFileRecurse(FileType.FILES, {
-                    if (it.name.endsWith(".groovy")) {
-                        parseClass(it)
-                    }
-                })
+                DirUtils.recursive(srcRoot, FileType.FILES, ~/\.groovy$/).each {
+                    parseClass(it)
+                }
 
                 // setup file system watch service
                 if (autoReload) {
-                    FileWatcher.watchDir(srcRoot, 60, {
-                        it ->
-                            def changes = reload(it as Changes<File>)
-                            eventBus.post(changes)
+                    fileWatcher = FileWatcher.watchDir(srcRoot, 60, {
+                        def changes = reload(it as Changes<File>)
+                        eventBus.post(changes)
                     })
                 } else {
                     fileWatcher = new FileWatcher(srcRoot)
@@ -74,7 +72,7 @@ class SummerClassLoader {
         }
     }
 
-    public ClassChanges reload(Changes<File> changes = null) {
+    ClassChanges reload(Changes<File> changes = null) {
 
         if (changes == null) {
             if (fileWatcher.isChange()) {
@@ -104,7 +102,7 @@ class SummerClassLoader {
         ret
     }
 
-    public Set<Class> scanPackage(PackageScan packageScan) {
+    Set<Class> scanPackage(PackageScan packageScan) {
         Set<Class> ret = ClassPathScanner.scan(packageScan)
 
         Map<String, Class> classMap = ret.collectEntries { [it.getName(), it] }
@@ -120,7 +118,7 @@ class SummerClassLoader {
     }
 
 
-    public Class findClass(String name) {
+    Class findClass(String name) {
         def clazz = gcl.loadedClasses.find { it.name == name }
         if (clazz == null) {
             clazz = Class.forName(name)

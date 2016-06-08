@@ -16,7 +16,7 @@ import java.util.regex.Pattern
 @Slf4j
 class ClassPathScanner {
 
-    public static boolean filter(String name, PackageScan scanner) {
+    static boolean filter(String name, PackageScan scanner) {
         String prefix = scanner.packageName + "."
 
         if (name.startsWith(prefix)) {
@@ -33,7 +33,7 @@ class ClassPathScanner {
     }
 
 
-    public static Set<Class> scan(PackageScan packageScan, boolean checkInOrEx = true, Pattern regex = null) {
+    static Set<Class> scan(PackageScan packageScan, boolean checkInOrEx = true, Pattern regex = null) {
         return scan(packageScan.packageName, packageScan.recursive, packageScan.excludeInner, checkInOrEx, regex)
     }
 

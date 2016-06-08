@@ -58,11 +58,11 @@ class Summer {
         module.stop()
     }
 
-    private void doInject(){
+    private void doInject() {
 
     }
 
-    private void doinitializate(){
+    private void doinitializate() {
 
     }
 
@@ -70,7 +70,7 @@ class Summer {
     // bean define
     ////////////////////////////////////
 
-    public NamedBean bean(String name, Object object, boolean isUpgrade = false) {
+    NamedBean bean(String name, Object object, boolean isUpgrade = false) {
         synchronized (this) {
 
             // check upgrade
@@ -90,7 +90,7 @@ class Summer {
         }
     }
 
-    public NamedBean bean(Object object, boolean isUpgrade = false) {
+    NamedBean bean(Object object, boolean isUpgrade = false) {
         Bean bean = object.class.getAnnotation(Bean.class)
         if (bean != null) {
             String name
@@ -105,16 +105,16 @@ class Summer {
         return null
     }
 
-    public NamedBean beanFromClass(Class clazz, boolean isUpgrade = false) {
+    NamedBean beanFromClass(Class clazz, boolean isUpgrade = false) {
         def o = clazz.newInstance()
         return bean(o, isUpgrade)
     }
 
-    public NamedBean beanFromClassName(String className, boolean isUpgrade = false) {
+    NamedBean beanFromClassName(String className, boolean isUpgrade = false) {
         return beanFromClass(classLoader.findClass(className), isUpgrade)
     }
 
-    public Map<String, Object> beansFromClasses(List<Class> classes, boolean isUpgrade = false) {
+    Map<String, Object> beansFromClasses(List<Class> classes, boolean isUpgrade = false) {
         return classes.findResults {
             beanFromClass(it, isUpgrade)
         }.collectEntries {
@@ -122,15 +122,39 @@ class Summer {
         }
     }
 
-    public Map<String, Object> beansFromPackage(PackageScan packageScan, boolean isUpgrade = false) {
+    Map<String, Object> beansFromPackage(PackageScan packageScan, boolean isUpgrade = false) {
         if (!isUpgrade) {
             watchPackages.add(packageScan)
         }
-        List<Class> classes = classLoader.scanPackage(packageScan).toList()
-        return beansFromClasses(classes, isUpgrade)
+        return beansFromClasses(classLoader.scanPackage(packageScan).toList(), isUpgrade)
     }
 
     ////////////////////////////////////
-    // get bean
+    // get bean(s)
     ////////////////////////////////////
+
+    Object getBean(String name) {
+        return namedBeans.get(name)
+    }
+
+    public <T> Map<String, T> getBeansByType(Class<T> clazz) {
+        Map<String, T> res = [:]
+
+        namedBeans.findAll { _, v -> v in T }.each {k, v -> res.put(k, v as T)}
+
+        return res
+    }
+
+    public <T> Map<String, T> getBeansInPackage(String packageName, Class<T> clazz = Object.class) {
+        Map<String, T> res = [:]
+
+        namedBeans.findAll { k, v ->
+            v.getClass().name.startsWith(packageName) && v in T
+        }.each { k, v ->
+            res.put(k, v as T)
+        }
+
+        return res;
+    }
+
 }
