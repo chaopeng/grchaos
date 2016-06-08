@@ -1,11 +1,12 @@
 ext.libs = [
-  groovy:  'org.codehaus.groovy:groovy-all:2.4.6',
-  guava:   'com.google.guava:guava:19.0',
-  slf4j:   'org.slf4j:slf4j-api:1.7.21',
-  
-  // runtime
-  logback: 'ch.qos.logback:logback-classic:1.1.7',
-  
-  // test
-  spock: 'org.spockframework:spock-core:1.0-groovy-2.4'
+        groovy  : 'org.codehaus.groovy:groovy-all:2.4.6',
+        guava   : 'com.google.guava:guava:19.0',
+        slf4j   : 'org.slf4j:slf4j-api:1.7.21',
+        rxgroovy: 'io.reactivex:rxgroovy:1.0.3',
+
+        // runtime
+        logback : 'ch.qos.logback:logback-classic:1.1.7',
+
+        // test
+        spock   : 'org.spockframework:spock-core:1.0-groovy-2.4'
 ]

@@ -2,6 +2,7 @@ package me.chaopeng.chaos4g.summer.aop
 
 import me.chaopeng.chaos4g.summer.aop.annotations.Aspect
 import me.chaopeng.chaos4g.summer.aop.annotations.AspectMe
+import rx.Observable
 
 /**
  * me.chaopeng.chaos4g.summer.aop.AopHelper
@@ -22,21 +23,12 @@ class AopHelper {
                 def arguments = args as Object[]
                 def method = delegate.class.metaClass.getMetaMethod(methodName, arguments)
 
-                Class[] argClasses = new Class[arguments.length]
-                for (int i = 0; i < arguments.length; ++i) {
-                    argClasses[i] = arguments[1].class
-                }
+                Class[] argClasses = Observable.from(arguments).map{it.class}.toBlocking().toIterable().toList()
                 def m = delegate.class.getDeclaredMethod(name, argClasses)
 
-                boolean needAspect = false
-
-                if (aspect.type() == Aspect.Type.ALL) {
-                    needAspect = true
-                } else if (aspect.type() == Aspect.Type.PUBLIC && method.isPublic()) {
-                    needAspect = true
-                } else {
-                    needAspect = m.getAnnotation(AspectMe.class) != null
-                }
+                boolean needAspect = aspect.type() == Aspect.Type.ALL ||
+                        (Aspect.Type.PUBLIC && method.isPublic()) ||
+                        m.getAnnotation(AspectMe.class) != null
 
                 if (needAspect) {
                     handler.begin(methodName, arguments)
@@ -57,7 +49,6 @@ class AopHelper {
                     method?.invoke(delegate, arguments)
                 }
             }
-
         }
 
     }

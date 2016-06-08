@@ -4,6 +4,7 @@ import com.google.common.hash.Hashing
 import groovy.io.FileType
 import groovy.util.logging.Slf4j
 import me.chaopeng.chaos4g.summer.bean.Changes
+import rx.Observable
 
 import java.nio.file.*
 import java.util.concurrent.TimeUnit
@@ -94,7 +95,7 @@ class FileWatcher {
     static void watchDir(String path, int intervalSecond, Closure closure) throws IOException {
         FileWatcher fileWatcher = new FileWatcher(path)
 
-        ScheduleUtils.get().scheduleWithFixedDelay({
+        Observable.interval(intervalSecond, intervalSecond, TimeUnit.SECONDS).subscribe{
 
             // if dir has any changes
             if (fileWatcher.isChange()) {
@@ -102,14 +103,13 @@ class FileWatcher {
                 def changes = fileWatcher.changes()
                 if (!changes.isEmpty()) {
                     try {
-                        closure.call(changes);
+                        closure.call(changes)
                     } catch (Exception e) {
-                        log.error(e.getMessage(), e);
+                        log.error(e.getMessage(), e)
                     }
                 }
             }
-
-        }, intervalSecond, intervalSecond, TimeUnit.SECONDS);
+        }
     }
 
 
