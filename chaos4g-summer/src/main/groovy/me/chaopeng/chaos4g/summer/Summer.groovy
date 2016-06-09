@@ -9,6 +9,7 @@ import me.chaopeng.chaos4g.summer.aop.IAspectHandler
 import me.chaopeng.chaos4g.summer.aop.annotations.Aspect
 import me.chaopeng.chaos4g.summer.bean.NamedBean
 import me.chaopeng.chaos4g.summer.bean.PackageScan
+import me.chaopeng.chaos4g.summer.bean.SummerAware
 import me.chaopeng.chaos4g.summer.event.ClassChanges
 import me.chaopeng.chaos4g.summer.excwptions.SummerException
 import me.chaopeng.chaos4g.summer.ioc.annotations.Bean
@@ -99,6 +100,10 @@ class Summer {
             } else {
                 ReflectUtils.setField(object, field, bean)
             }
+        }
+
+        if (object in SummerAware) {
+            (object as SummerAware).summer = this
         }
     }
 
