@@ -13,8 +13,10 @@ class AopHelper {
 
     static void install(GroovyObject object, IAspectHandler handler) {
 
-        Aspect aspect = object.getClass().getAnnotation(Aspect);
+        Aspect aspect = object.getClass().getAnnotation(Aspect)
         if (aspect != null) {
+
+            handler.target = object
 
             object.metaClass.invokeMethod { name, args ->
 
@@ -22,10 +24,10 @@ class AopHelper {
                 def arguments = args as Object[]
                 def method = delegate.class.metaClass.getMetaMethod(methodName, arguments)
 
-                Class[] argClasses = arguments.collect {it.class}
+                Class[] argClasses = arguments.collect { it.class }
                 def m = delegate.class.getDeclaredMethod(name, argClasses)
 
-                boolean needAspect = aspect.type() == Aspect.Type.ALL ||
+                boolean needAspect = (aspect.type() == Aspect.Type.ALL) ||
                         (Aspect.Type.PUBLIC && method.isPublic()) ||
                         m.getAnnotation(AspectMe.class) != null
 
