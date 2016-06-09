@@ -1,5 +1,7 @@
 package me.chaopeng.chaos4g.summer
 
+import me.chaopeng.chaos4g.summer.bean.PackageScan
+
 /**
  * me.chaopeng.chaos4g.summer.AbstractSummerModule
  *
@@ -15,6 +17,24 @@ abstract class AbstractSummerModule {
     protected abstract void start()
     protected abstract void stop()
 
+    final void bean(String name, Object obj) {
+        summer.bean(name, obj)
+    }
 
+    final void bean(Object obj) {
+        summer.bean(obj)
+    }
+
+    final void fromClass(String className) {
+        summer.beanFromClassName(className)
+    }
+
+    final void fromClass(Class clazz) {
+        summer.beanFromClass(clazz)
+    }
+
+    final void fromPackage(PackageScan packageScan) {
+        summer.beansFromPackage(packageScan)
+    }
 
 }
