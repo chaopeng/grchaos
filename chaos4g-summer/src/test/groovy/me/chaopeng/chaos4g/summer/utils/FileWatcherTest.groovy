@@ -38,6 +38,7 @@ class FileWatcherTest extends Specification {
 
     def "change when create"() {
         when:
+        sleep(1000)
         Files.touch(new File("tmp/4.txt"))
 
         then:

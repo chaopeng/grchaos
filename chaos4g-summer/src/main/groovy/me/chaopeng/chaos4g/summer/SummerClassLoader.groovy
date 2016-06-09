@@ -6,7 +6,7 @@ import groovy.util.logging.Slf4j
 import me.chaopeng.chaos4g.summer.bean.Changes
 import me.chaopeng.chaos4g.summer.bean.PackageScan
 import me.chaopeng.chaos4g.summer.event.ClassChanges
-import me.chaopeng.chaos4g.summer.excwptions.SummerException
+import me.chaopeng.chaos4g.summer.exceptions.SummerException
 import me.chaopeng.chaos4g.summer.utils.ClassPathScanner
 import me.chaopeng.chaos4g.summer.utils.DirUtils
 import me.chaopeng.chaos4g.summer.utils.FileWatcher

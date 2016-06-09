@@ -14,8 +14,7 @@ class ClassPathScannerTest extends Specification {
     def "scan"() {
 
         expect:
-        ClassPathScanner.scan(
-                PackageScan.builder().packageName("test").recursive(recursive).excludeInner(excludeInner).build(), true)
+        ClassPathScanner.scan(new PackageScan(packageName:"test", recursive:recursive, excludeInner:excludeInner), true)
                 .collect { it.simpleName }.sort() == classes.sort()
 
         where:

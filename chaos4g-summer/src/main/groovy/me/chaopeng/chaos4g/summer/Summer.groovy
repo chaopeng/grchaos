@@ -1,7 +1,6 @@
 package me.chaopeng.chaos4g.summer
 
 import com.google.common.base.CaseFormat
-import com.google.common.eventbus.EventBus
 import com.google.common.eventbus.Subscribe
 import groovy.util.logging.Slf4j
 import me.chaopeng.chaos4g.summer.aop.AopHelper
@@ -11,7 +10,7 @@ import me.chaopeng.chaos4g.summer.bean.NamedBean
 import me.chaopeng.chaos4g.summer.bean.PackageScan
 import me.chaopeng.chaos4g.summer.bean.SummerAware
 import me.chaopeng.chaos4g.summer.event.ClassChanges
-import me.chaopeng.chaos4g.summer.excwptions.SummerException
+import me.chaopeng.chaos4g.summer.exceptions.SummerException
 import me.chaopeng.chaos4g.summer.ioc.annotations.Bean
 import me.chaopeng.chaos4g.summer.ioc.annotations.Inject
 import me.chaopeng.chaos4g.summer.ioc.lifecycle.Destroy

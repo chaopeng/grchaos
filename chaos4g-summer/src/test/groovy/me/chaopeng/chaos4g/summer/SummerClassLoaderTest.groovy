@@ -17,40 +17,12 @@ class SummerClassLoaderTest extends Specification {
     def scl
 
     def setup() {
-
-        DirUtils.mkdir("tmp")
-
-        def srcClass1 = '''\
-package test
-
-class SrcClass1 {
-
-    static class SrcClass1Inner {
-
-    }
-
-}
-        '''
-
-        def srcClass2 = '''\
-package test
-
-class SrcClass2 {
-
-    def hello(){
-        "hello"
-    }
-}
-'''
-        Files.write(srcClass1, new File("tmp/SrcClass1.groovy"), Charsets.UTF_8)
-        Files.write(srcClass2, new File("tmp/SrcClass2.groovy"), Charsets.UTF_8)
-
+        TestHelper.reloadableClassesSetup()
         scl = SummerClassLoader.create("tmp")
     }
 
     def cleanup() {
-        def tmp = new File("tmp")
-        tmp.deleteDir();
+        TestHelper.reloadableClassesCleanup()
     }
 
     def "init & find"() {
@@ -140,7 +112,7 @@ class SrcClass3 {
     def "package scan"() {
 
         expect:
-        scl.scanPackage(PackageScan.builder().packageName("test").recursive(recursive).excludeInner(excludeInner).build())
+        scl.scanPackage(new PackageScan(packageName:"test", recursive:recursive, excludeInner:excludeInner))
                 .collect { it.simpleName }.sort() == classes.sort()
 
         where:

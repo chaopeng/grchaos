@@ -1,7 +1,7 @@
-package me.chaopeng.chaos4g.summer.excwptions
+package me.chaopeng.chaos4g.summer.exceptions
 
 /**
- * me.chaopeng.chaos4g.summer.excwptions.SummerException
+ * me.chaopeng.chaos4g.summer.exceptions.SummerException
  *
  * @author chao
  * @version 1.0 - 2016-06-05

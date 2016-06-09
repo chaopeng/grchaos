@@ -8,7 +8,6 @@ import groovy.transform.builder.Builder
  * @author chao
  * @version 1.0 - 2016-06-06
  */
-@Builder
 class PackageScan {
 
     String packageName

@@ -1,16 +1,22 @@
 package test
 
 import me.chaopeng.chaos4g.summer.aop.annotations.AspectMe
+import me.chaopeng.chaos4g.summer.ioc.annotations.Bean
 import me.chaopeng.chaos4g.summer.ioc.annotations.Inject
 
+@Bean
 class Class1 {
 
+    @Inject
+    def class2
+
+    @Bean
     static class Class1Inner {
         @Inject
-        private int i1
+        private def class2
 
         @Inject
-        private int i2
+        private def class1
 
         @AspectMe
         private def a(){
