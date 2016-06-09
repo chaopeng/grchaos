@@ -13,7 +13,9 @@ trait IAspectHandler {
     abstract void before(String name, Object[] args)
     abstract boolean filter(String name, Object[] args)
     abstract void end(String name, Object[] args)
-    abstract void error(String name, Object[] args, Throwable error)
+    void error(String name, Object[] args, Throwable error) {
+        throw error
+    }
     abstract void after(String name, Object[] args)
 
 }
