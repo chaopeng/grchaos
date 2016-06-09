@@ -2,12 +2,18 @@ package me.chaopeng.chaos4g.summer
 
 import com.google.common.base.CaseFormat
 import com.google.common.eventbus.EventBus
+import com.google.common.eventbus.Subscribe
 import groovy.util.logging.Slf4j
+import me.chaopeng.chaos4g.summer.aop.AopHelper
+import me.chaopeng.chaos4g.summer.aop.IAspectHandler
+import me.chaopeng.chaos4g.summer.aop.annotations.Aspect
 import me.chaopeng.chaos4g.summer.bean.NamedBean
 import me.chaopeng.chaos4g.summer.bean.PackageScan
+import me.chaopeng.chaos4g.summer.event.ClassChanges
 import me.chaopeng.chaos4g.summer.excwptions.SummerException
 import me.chaopeng.chaos4g.summer.ioc.annotations.Bean
 import me.chaopeng.chaos4g.summer.ioc.annotations.Inject
+import me.chaopeng.chaos4g.summer.ioc.lifecycle.Destroy
 import me.chaopeng.chaos4g.summer.ioc.lifecycle.Initialization
 import me.chaopeng.chaos4g.summer.utils.ReflectUtils
 
@@ -23,7 +29,6 @@ import java.lang.ref.WeakReference
 class Summer {
 
     private SummerClassLoader classLoader
-    private EventBus eventBus
     private Map<String, Object> namedBeans = new HashMap<>()
     private List<WeakReference<Object>> anonymousBeans = new LinkedList<>()
     private List<PackageScan> watchPackages = new LinkedList<>()
@@ -34,8 +39,7 @@ class Summer {
 
     Summer(String srcRoot = null, boolean autoReload = false) {
         classLoader = SummerClassLoader.create(srcRoot)
-        eventBus = classLoader.eventBus
-        eventBus.register(this)
+        classLoader.eventBus.register(this)
     }
 
     ////////////////////////////////////
@@ -53,23 +57,38 @@ class Summer {
 
     synchronized void start() {
         doInject()
-        doinitializate()
+        doAddAspect()
+        doInitializate()
         module.start()
     }
 
-    synchronized void upgrade() {
+    @Subscribe
+    synchronized void upgrade(ClassChanges changes) {
 
     }
 
     synchronized void stop() {
         module.stop()
+
+    }
+
+    /**
+     * will do inject, aspect
+     * @param object
+     */
+    void injectMe(Object object) {
+        doInject(object)
+        doAddAspect(object)
+        anonymousBeans.add(new WeakReference<Object>(object))
     }
 
     private void doInject() {
-
+        namedBeans.values().each { bean ->
+            doInject(bean)
+        }
     }
 
-    private void doInject(Object object, Map m=namedBeans, boolean isUpgrade=false){
+    private void doInject(Object object, Map m = namedBeans, boolean isUpgrade = false) {
         def fields = ReflectUtils.getFieldsByAnnotation(object, Inject.class)
         fields.each { field ->
             def inject = field.getAnnotation(Inject.class)
@@ -83,13 +102,45 @@ class Summer {
         }
     }
 
-    private void doinitializate(){
-
+    private void doAddAspect() {
+        namedBeans.values()
+                .each { bean -> doAddAspect(bean) }
     }
 
-    private void doinitializate(Object object) {
+    private void doAddAspect(Object object) {
+        def aspect = object.class.getAnnotation(Aspect.class)
+        if (aspect) {
+
+            if (object in GroovyObject) {
+                def handler = classLoader.findClass(aspect.handler())
+                AopHelper.install(object as GroovyObject, handler.newInstance() as IAspectHandler)
+            } else {
+                log.warn("not support java class aop yet")
+            }
+        }
+    }
+
+    private void doInitializate() {
+        namedBeans.values().each { bean ->
+            doInitializate(bean)
+        }
+    }
+
+    private void doInitializate(Object object) {
         if (object in Initialization) {
             (object as Initialization).initializate()
+        }
+    }
+
+    private void doDestroy() {
+        namedBeans.values().each { bean ->
+            doDestroy(bean)
+        }
+    }
+
+    private void doDestroy(Object object) {
+        if (object in Destroy) {
+            (object as Destroy).destroy()
         }
     }
 
@@ -167,7 +218,7 @@ class Summer {
     public <T> Map<String, T> getBeansByType(Class<T> clazz) {
         Map<String, T> res = [:]
 
-        namedBeans.findAll { _, v -> v in T }.each {k, v -> res.put(k, v as T)}
+        namedBeans.findAll { _, v -> v in T }.each { k, v -> res.put(k, v as T) }
 
         return res
     }

@@ -1,6 +1,8 @@
 package me.chaopeng.chaos4g.summer.ioc.lifecycle
 
 /**
+ * only for namedBean
+ *
  * me.chaopeng.chaos4g.summer.ioc.lifecycle.Initialization
  *
  * @author chao
