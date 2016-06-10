@@ -15,9 +15,12 @@ import me.chaopeng.chaos4g.summer.ioc.annotations.Bean
 import me.chaopeng.chaos4g.summer.ioc.annotations.Inject
 import me.chaopeng.chaos4g.summer.ioc.lifecycle.Destroy
 import me.chaopeng.chaos4g.summer.ioc.lifecycle.Initialization
+import me.chaopeng.chaos4g.summer.ioc.lifecycle.SummerUpgrade
+import me.chaopeng.chaos4g.summer.utils.ClassPathScanner
 import me.chaopeng.chaos4g.summer.utils.ReflectUtils
 
 import java.lang.ref.WeakReference
+import java.lang.reflect.Field
 
 /**
  * me.chaopeng.chaos4g.summer.Summer
@@ -28,23 +31,26 @@ import java.lang.ref.WeakReference
 @Slf4j
 class Summer {
 
-    private SummerClassLoader classLoader
-    private Map<String, Object> namedBeans = [:]
+    private final SummerClassLoader classLoader
+    private AbstractSummerModule module
+    protected Map<String, Object> namedBeans = [:]
     private List<WeakReference<Object>> anonymousBeans = new LinkedList<>()
     private List<PackageScan> watchPackages = new LinkedList<>()
     private Set<String> watchClasses = new HashSet<>()
-    private AbstractSummerModule module
     private boolean isInit = false
-
 
     Summer(String srcRoot = null, boolean autoReload = false) {
         classLoader = SummerClassLoader.create(srcRoot)
         classLoader.eventBus.register(this)
     }
 
-    ////////////////////////////////////
-    // Life Cycle
-    ////////////////////////////////////
+    SummerClassLoader getClassLoader() {
+        return classLoader
+    }
+
+////////////////////////////////////
+// Life Cycle
+////////////////////////////////////
 
     synchronized void loadModule(AbstractSummerModule module) {
         if (!isInit) {
@@ -69,6 +75,97 @@ class Summer {
     @Subscribe
     synchronized void upgrade(ClassChanges changes) {
 
+        if (!changes.isEmpty()) {
+            try {
+                Map<String, Object> newNamedBeans = [:]
+                newNamedBeans.putAll(namedBeans)
+
+                Map<String, Object> upgradedBeans = [:]
+
+                // for updates
+                changes.changes.each {
+                    // if it already a bean, replace or remove
+                    if (watchClasses.contains(it.name)) {
+                        def b = bean(it.newInstance(), true)
+                        if (b != null) {
+                            // update bean
+                            newNamedBeans.put(b.name, b.object)
+                            upgradedBeans.put(b.name, b.object)
+                        } else {
+                            // class still here just without @Bean, but we ignore it
+                        }
+                    }
+
+                    // else check is it in watchPackage
+                    else if (watchPackages.any { p -> ClassPathScanner.filter(it.name, p) }) {
+                        def b = bean(it.newInstance(), true)
+                        if (b != null) {
+                            // add bean
+                            newNamedBeans.put(b.name, b.object)
+                            upgradedBeans.put(b.name, b.object)
+                        }
+                    }
+                }
+
+                // for add
+                changes.adds.each {
+                    if (watchPackages.any { p -> ClassPathScanner.filter(it.name, p) }) {
+                        def b = bean(it.newInstance(), true)
+                        if (b != null) {
+                            // add bean
+                            newNamedBeans.put(b.name, b.object)
+                        }
+                    }
+                }
+
+                // for delete
+                changes.deletes.each {
+                    // we ignore it
+                }
+
+                // check all dependencies
+                def missing = getAllDependencies(newNamedBeans).findAll { dep -> !newNamedBeans.containsKey(dep.name) }
+                if (!missing.isEmpty()) {
+
+                    def errorMessage = missing.collect {
+                        "inject $it.obj.class.name failed: no bean named $it.name."
+                    }.join("\n")
+
+                    throw new SummerException(errorMessage)
+
+                }
+
+                // inject & init new obj
+                doInject(upgradedBeans, newNamedBeans)
+                doInitializate(upgradedBeans)
+
+                // update inject in exists beans
+                newNamedBeans.findAll { k, v ->
+                    !upgradedBeans.containsKey(k)
+                }.each { k, v ->
+                    doInject(v, upgradedBeans, true)
+                }
+
+                anonymousBeans.removeAll { it.get() == null }
+                anonymousBeans.each {
+                    doInject(it, upgradedBeans, true)
+                }
+
+                // replace
+                namedBeans = newNamedBeans
+
+                // notify all upgrade()
+                namedBeans.findAll { k, v ->
+                    !upgradedBeans.containsKey(k)
+                }.each { k, v ->
+                    upgradeNotify(v)
+                }
+
+            } catch (Exception e) {
+                log.error("upgrade failed. ${e.message}", e)
+            }
+        }
+
     }
 
     protected synchronized void stop() {
@@ -86,27 +183,40 @@ class Summer {
         anonymousBeans.add(new WeakReference<Object>(object))
     }
 
-    private void doInject() {
-        namedBeans.values().each { bean ->
-            doInject(bean)
+    private void doInject(Map m = namedBeans, Map deps = namedBeans) {
+        m.values().each { bean ->
+            doInject(bean, deps)
         }
     }
 
-    private void doInject(Object object, Map m = namedBeans, boolean isUpgrade = false) {
+    protected List getAllDependencies(Map m = namedBeans) {
+        m.values().inject([]) { array, obj ->
+            ReflectUtils.getFieldsByAnnotation(obj, Inject.class).each { field ->
+                def name = getBeanNameFromField(field)
+                array << [obj: obj, name: name, field: field]
+            }
+        }.collect()
+    }
+
+    private String getBeanNameFromField(Field field) {
+        def inject = field.getAnnotation(Inject.class)
+        return inject.value().isEmpty() ? field.getName() : inject.value()
+    }
+
+    private void doInject(Object object, Map m = namedBeans, isUpgrade = false) {
         def fields = ReflectUtils.getFieldsByAnnotation(object, Inject.class)
         fields.each { field ->
-            def inject = field.getAnnotation(Inject.class)
-            def name = inject.value().isEmpty() ? field.getName() : inject.value()
+            def name = getBeanNameFromField(field)
             def bean = m.get(name)
-            if (bean == null) {
-                throw new SummerException("no bean named $name")
+            if (bean == null && !isUpgrade) {
+                throw new SummerException("inject $object.class.name failed: no bean named $name.")
             } else {
                 ReflectUtils.setField(object, field, bean)
             }
         }
 
         if (object in SummerAware) {
-            ((SummerAware)object).summer = this
+            ((SummerAware) object).summer = this
         }
     }
 
@@ -121,22 +231,22 @@ class Summer {
 
             if (object in GroovyObject) {
                 def handler = classLoader.findClass(aspect.handler())
-                AopHelper.install((GroovyObject)object, (IAspectHandler)handler.newInstance())
+                AopHelper.install((GroovyObject) object, (IAspectHandler) handler.newInstance())
             } else {
                 log.warn("not support java class aop yet")
             }
         }
     }
 
-    private void doInitializate() {
-        namedBeans.values().each { bean ->
+    private void doInitializate(Map m = namedBeans) {
+        m.values().each { bean ->
             doInitializate(bean)
         }
     }
 
     private void doInitializate(Object object) {
         if (object in Initialization) {
-            ((Initialization)object).initializate()
+            ((Initialization) object).initializate()
         }
     }
 
@@ -148,13 +258,19 @@ class Summer {
 
     private void doDestroy(Object object) {
         if (object in Destroy) {
-            ((Destroy)object).destroy()
+            ((Destroy) object).destroy()
         }
     }
 
-    ////////////////////////////////////
-    // bean define
-    ////////////////////////////////////
+    private void upgradeNotify(Object object) {
+        if (object in SummerUpgrade) {
+            ((SummerUpgrade) object).upgrade()
+        }
+    }
+
+////////////////////////////////////
+// bean define
+////////////////////////////////////
 
     protected NamedBean bean(String name, Object object, boolean isUpgrade = false) {
         synchronized (this) {
@@ -215,18 +331,26 @@ class Summer {
         return beansFromClasses(classLoader.scanPackage(packageScan).toList(), isUpgrade)
     }
 
-    ////////////////////////////////////
-    // get bean(s)
-    ////////////////////////////////////
+////////////////////////////////////
+// get bean(s)
+////////////////////////////////////
 
     Object getBean(String name) {
         return namedBeans.get(name)
     }
 
+    public <T> Map<String, T> getBeansByType(String clazzName) {
+        Map<String, T> res = [:]
+
+        namedBeans.findAll { _, v -> v.class.name == clazzName }.each { k, v -> res.put(k, (T) v) }
+
+        return res
+    }
+
     public <T> Map<String, T> getBeansByType(Class<T> clazz) {
         Map<String, T> res = [:]
 
-        namedBeans.findAll { _, v -> v in T }.each { k, v -> res.put(k, (T)v) }
+        namedBeans.findAll { _, v -> v in T }.each { k, v -> res.put(k, (T) v) }
 
         return res
     }
@@ -237,7 +361,7 @@ class Summer {
         namedBeans.findAll { k, v ->
             v.getClass().name.startsWith(packageName) && v in T
         }.each { k, v ->
-            res.put(k, (T)v)
+            res.put(k, (T) v)
         }
 
         return res;
