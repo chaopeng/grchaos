@@ -152,13 +152,13 @@ class SummerTest extends Specification {
 
         expect:
 
-        class3.call == 0
-        class3.call == 0
-        class3.call == 0
+        class3.getCall() == 0
+        class3.getCall() == 0
+        class3.getCall() == 0
         summer.injectMe(class3)
-        class3.call == 0
-        class3.call == 1
-        class3.call == 2
+        class3.getCall() == 0
+        class3.getCall() == 1
+        class3.getCall() == 2
 
     }
 

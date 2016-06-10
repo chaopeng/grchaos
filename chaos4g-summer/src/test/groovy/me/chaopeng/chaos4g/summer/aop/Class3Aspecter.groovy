@@ -17,11 +17,6 @@ class Class3Aspecter implements IAspectHandler {
     }
 
     @Override
-    boolean filter(String name, Object[] args) {
-        return false
-    }
-
-    @Override
     void end(String name, Object[] args) {
 
     }

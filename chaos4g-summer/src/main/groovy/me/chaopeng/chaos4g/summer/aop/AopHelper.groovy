@@ -45,9 +45,9 @@ class AopHelper {
                     } finally {
                         handler.after(methodName, arguments)
                     }
-                    result
+                    return result
                 } else {
-                    method?.invoke(delegate, arguments)
+                    return method?.invoke(delegate, arguments)
                 }
             }
         }
