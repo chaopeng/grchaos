@@ -6,6 +6,7 @@ import groovy.util.logging.Slf4j
 import me.chaopeng.chaos4g.summer.aop.AopHelper
 import me.chaopeng.chaos4g.summer.aop.IAspectHandler
 import me.chaopeng.chaos4g.summer.aop.annotations.Aspect
+import me.chaopeng.chaos4g.summer.bean.DependencyBean
 import me.chaopeng.chaos4g.summer.bean.NamedBean
 import me.chaopeng.chaos4g.summer.bean.PackageScan
 import me.chaopeng.chaos4g.summer.bean.SummerAware
@@ -128,7 +129,7 @@ class Summer {
                 if (!missing.isEmpty()) {
 
                     def errorMessage = missing.collect {
-                        "inject $it.obj.class.name failed: no bean named $it.name."
+                        "inject ${it.object.class.name} failed: no bean named ${it.name}."
                     }.join("\n")
 
                     throw new SummerException(errorMessage)
@@ -189,11 +190,11 @@ class Summer {
         }
     }
 
-    protected List getAllDependencies(Map m = namedBeans) {
+    protected List<DependencyBean> getAllDependencies(Map m = namedBeans) {
         m.values().inject([]) { array, obj ->
             ReflectUtils.getFieldsByAnnotation(obj, Inject.class).each { field ->
                 def name = getBeanNameFromField(field)
-                array << [obj: obj, name: name, field: field]
+                array << [object: obj, name: name, field: field] as DependencyBean
             }
         }.collect()
     }
@@ -209,7 +210,7 @@ class Summer {
             def name = getBeanNameFromField(field)
             def bean = m.get(name)
             if (bean == null && !isUpgrade) {
-                throw new SummerException("inject $object.class.name failed: no bean named $name.")
+                throw new SummerException("inject ${object.class.name} failed: no bean named $name.")
             } else {
                 ReflectUtils.setField(object, field, bean)
             }
