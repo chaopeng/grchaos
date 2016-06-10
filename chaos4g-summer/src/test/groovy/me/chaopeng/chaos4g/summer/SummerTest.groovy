@@ -1,6 +1,7 @@
 package me.chaopeng.chaos4g.summer
 
 import me.chaopeng.chaos4g.summer.bean.PackageScan
+import me.chaopeng.chaos4g.summer.exceptions.SummerException
 import spock.lang.Specification
 import test.Class1
 import test.Class2
@@ -39,16 +40,6 @@ class SummerTest extends Specification {
                 fromClass(Class1.Class1Inner.class)
                 fromClass(Class2.class.name)
             }
-
-            @Override
-            protected void start() {
-
-            }
-
-            @Override
-            protected void stop() {
-
-            }
         })
 
         expect:
@@ -71,16 +62,6 @@ class SummerTest extends Specification {
             @Override
             protected void configure() {
                 fromPackage(new PackageScan(packageName: "test"))
-            }
-
-            @Override
-            protected void start() {
-
-            }
-
-            @Override
-            protected void stop() {
-
             }
         })
 
@@ -105,16 +86,6 @@ class SummerTest extends Specification {
             protected void configure() {
                 fromPackage(new PackageScan(packageName: "test", recursive: false))
             }
-
-            @Override
-            protected void start() {
-
-            }
-
-            @Override
-            protected void stop() {
-
-            }
         })
         summer.start()
 
@@ -134,16 +105,6 @@ class SummerTest extends Specification {
             @Override
             protected void configure() {
                 fromPackage(new PackageScan(packageName: "test", recursive: false))
-            }
-
-            @Override
-            protected void start() {
-
-            }
-
-            @Override
-            protected void stop() {
-
             }
         })
         summer.start()
@@ -169,16 +130,6 @@ class SummerTest extends Specification {
             protected void configure() {
                 fromPackage(new PackageScan(packageName: "test", recursive: true))
             }
-
-            @Override
-            protected void start() {
-
-            }
-
-            @Override
-            protected void stop() {
-
-            }
         })
         summer.start()
 
@@ -191,5 +142,21 @@ class SummerTest extends Specification {
         class3.getCall() == 2
 
     }
+
+    def "bean name conflict"(){
+
+        when:
+        summer.loadModule(new AbstractSummerModule() {
+            @Override
+            protected void configure() {
+                fromPackage(new PackageScan(packageName: "test", recursive: true))
+                bean("class1", new Object())
+            }
+        })
+
+        then:
+        thrown(SummerException)
+    }
+
 
 }
