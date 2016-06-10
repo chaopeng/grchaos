@@ -152,10 +152,40 @@ class SummerTest extends Specification {
 
         expect:
 
-        class3.getCall() == 0
-        class3.getCall() == 0
-        class3.getCall() == 0
+        class3.getCall() == -1
+        class3.getCall() == -1
+        class3.getCall() == -1
         summer.injectMe(class3)
+        class3.getCall() == -1
+        class3.getCall() == 0
+        class3.getCall() == 1
+
+    }
+
+    def "initializate & aspest"(){
+        setup:
+        summer.loadModule(new AbstractSummerModule() {
+            @Override
+            protected void configure() {
+                fromPackage(new PackageScan(packageName: "test", recursive: true))
+            }
+
+            @Override
+            protected void start() {
+
+            }
+
+            @Override
+            protected void stop() {
+
+            }
+        })
+        summer.start()
+
+        Class3 class3 = summer.getBean("class3")
+
+        expect:
+
         class3.getCall() == 0
         class3.getCall() == 1
         class3.getCall() == 2

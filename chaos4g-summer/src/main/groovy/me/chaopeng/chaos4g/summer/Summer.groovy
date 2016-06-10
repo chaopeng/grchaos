@@ -117,7 +117,7 @@ class Summer {
 
             if (object in GroovyObject) {
                 def handler = classLoader.findClass(aspect.handler())
-                AopHelper.install(object as GroovyObject, handler.newInstance() as IAspectHandler)
+                AopHelper.install((GroovyObject)object, (IAspectHandler)handler.newInstance())
             } else {
                 log.warn("not support java class aop yet")
             }
@@ -132,7 +132,7 @@ class Summer {
 
     private void doInitializate(Object object) {
         if (object in Initialization) {
-            (object as Initialization).initializate()
+            ((Initialization)object).initializate()
         }
     }
 
@@ -144,7 +144,7 @@ class Summer {
 
     private void doDestroy(Object object) {
         if (object in Destroy) {
-            (object as Destroy).destroy()
+            ((Destroy)object).destroy()
         }
     }
 

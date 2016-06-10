@@ -28,7 +28,7 @@ class AopHelper {
                 def m = delegate.class.getDeclaredMethod(name, argClasses)
 
                 boolean needAspect = (aspect.type() == Aspect.Type.ALL) ||
-                        (Aspect.Type.PUBLIC && method.isPublic()) ||
+                        (aspect.type() == Aspect.Type.PUBLIC && method.isPublic()) ||
                         m.getAnnotation(AspectMe.class) != null
 
                 if (needAspect) {
