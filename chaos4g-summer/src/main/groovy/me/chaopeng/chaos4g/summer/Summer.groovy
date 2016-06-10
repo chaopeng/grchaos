@@ -102,7 +102,7 @@ class Summer {
         }
 
         if (object in SummerAware) {
-            (object as SummerAware).summer = this
+            ((SummerAware)object).summer = this
         }
     }
 
@@ -222,7 +222,7 @@ class Summer {
     public <T> Map<String, T> getBeansByType(Class<T> clazz) {
         Map<String, T> res = [:]
 
-        namedBeans.findAll { _, v -> v in T }.each { k, v -> res.put(k, v as T) }
+        namedBeans.findAll { _, v -> v in T }.each { k, v -> res.put(k, (T)v) }
 
         return res
     }
@@ -233,7 +233,7 @@ class Summer {
         namedBeans.findAll { k, v ->
             v.getClass().name.startsWith(packageName) && v in T
         }.each { k, v ->
-            res.put(k, v as T)
+            res.put(k, (T)v)
         }
 
         return res;
