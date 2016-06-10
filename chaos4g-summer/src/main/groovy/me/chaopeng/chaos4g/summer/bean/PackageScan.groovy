@@ -1,7 +1,4 @@
 package me.chaopeng.chaos4g.summer.bean
-
-import groovy.transform.builder.Builder
-
 /**
  * me.chaopeng.chaos4g.summer.bean.PackageScan
  *

@@ -1,6 +1,8 @@
 package me.chaopeng.chaos4g.summer
 
 import com.google.common.base.CaseFormat
+import com.google.common.collect.ArrayListMultimap
+import com.google.common.collect.Multimap
 import com.google.common.eventbus.Subscribe
 import groovy.util.logging.Slf4j
 import me.chaopeng.chaos4g.summer.aop.AopHelper
@@ -45,7 +47,7 @@ class Summer {
         classLoader.eventBus.register(this)
     }
 
-    SummerClassLoader getClassLoader() {
+    protected SummerClassLoader getClassLoader() {
         return classLoader
     }
 
@@ -67,6 +69,12 @@ class Summer {
     }
 
     synchronized void start() {
+        // check all dependencies
+        def missing = testAllDepes()
+        if (!missing.isEmpty()) {
+            throw missingDepesException(missing)
+        }
+
         doInject()
         doAddAspect()
         doInitializate()
@@ -125,15 +133,9 @@ class Summer {
                 }
 
                 // check all dependencies
-                def missing = getAllDependencies(newNamedBeans).findAll { dep -> !newNamedBeans.containsKey(dep.name) }
+                def missing = testAllDepes(newNamedBeans, newNamedBeans)
                 if (!missing.isEmpty()) {
-
-                    def errorMessage = missing.collect {
-                        "inject ${it.object.class.name} failed: no bean named ${it.name}."
-                    }.join("\n")
-
-                    throw new SummerException(errorMessage)
-
+                    throw missingDepesException(missing)
                 }
 
                 // inject & init new obj
@@ -190,16 +192,29 @@ class Summer {
         }
     }
 
-    protected List<DependencyBean> getAllDependencies(Map m = namedBeans) {
-        m.values().inject([]) { array, obj ->
-            ReflectUtils.getFieldsByAnnotation(obj, Inject.class).each { field ->
+    protected Multimap<String, DependencyBean> testAllDepes(Map<String, Object> m = namedBeans, Map<String, Object> deps = namedBeans) {
+        Multimap<String, DependencyBean> res = ArrayListMultimap.create();
+        m.namedBeans.each { k, v ->
+            ReflectUtils.getFieldsByAnnotation(v, Inject.class).each { field ->
                 def name = getBeanNameFromField(field)
-                array << [object: obj, name: name, field: field] as DependencyBean
+                if (!deps.containsKey(name)) {
+                    res.put(k as String, new DependencyBean(object: v, field: field, name: name))
+                }
             }
-        }.collect()
+        }
+
+        return res
     }
 
-    private String getBeanNameFromField(Field field) {
+    private SummerException missingDepesException(Multimap<String, DependencyBean> missing){
+        def errorMessage = missing.values().collect {
+            "inject ${it.object.class.name} failed: no bean named ${it.name}."
+        }.join("\n")
+
+        return new SummerException(errorMessage)
+    }
+
+    protected static String getBeanNameFromField(Field field) {
         def inject = field.getAnnotation(Inject.class)
         return inject.value().isEmpty() ? field.getName() : inject.value()
     }
