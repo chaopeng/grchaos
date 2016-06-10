@@ -24,7 +24,7 @@ class SummerClassLoader {
     private String srcRoot;
     private Map<String, List<Class>> fileToClasses = new HashMap<>()
     private FileWatcher fileWatcher
-    EventBus eventBus = new EventBus();
+    protected EventBus eventBus = new EventBus();
 
     private SummerClassLoader() {
         gcl.class.getDeclaredMethods().each {

@@ -29,7 +29,7 @@ import java.lang.ref.WeakReference
 class Summer {
 
     private SummerClassLoader classLoader
-    private Map<String, Object> namedBeans = new HashMap<>()
+    private Map<String, Object> namedBeans = [:]
     private List<WeakReference<Object>> anonymousBeans = new LinkedList<>()
     private List<PackageScan> watchPackages = new LinkedList<>()
     private Set<String> watchClasses = new HashSet<>()
@@ -52,6 +52,10 @@ class Summer {
             module.summer = this
             module.configure()
             isInit = true
+
+            Runtime.getRuntime().addShutdownHook({
+                stop()
+            });
         }
     }
 
@@ -67,9 +71,9 @@ class Summer {
 
     }
 
-    synchronized void stop() {
+    protected synchronized void stop() {
         module.stop()
-
+        doDestroy()
     }
 
     /**
@@ -152,7 +156,7 @@ class Summer {
     // bean define
     ////////////////////////////////////
 
-    NamedBean bean(String name, Object object, boolean isUpgrade = false) {
+    protected NamedBean bean(String name, Object object, boolean isUpgrade = false) {
         synchronized (this) {
 
             // check upgrade
@@ -172,7 +176,7 @@ class Summer {
         }
     }
 
-    NamedBean bean(Object object, boolean isUpgrade = false) {
+    protected NamedBean bean(Object object, boolean isUpgrade = false) {
         Bean bean = object.class.getAnnotation(Bean.class)
         if (bean != null) {
             String name
@@ -187,16 +191,16 @@ class Summer {
         return null
     }
 
-    NamedBean beanFromClass(Class clazz, boolean isUpgrade = false) {
+    protected NamedBean beanFromClass(Class clazz, boolean isUpgrade = false) {
         def o = clazz.newInstance()
         return bean(o, isUpgrade)
     }
 
-    NamedBean beanFromClassName(String className, boolean isUpgrade = false) {
+    protected NamedBean beanFromClassName(String className, boolean isUpgrade = false) {
         return beanFromClass(classLoader.findClass(className), isUpgrade)
     }
 
-    Map<String, Object> beansFromClasses(List<Class> classes, boolean isUpgrade = false) {
+    protected Map<String, Object> beansFromClasses(List<Class> classes, boolean isUpgrade = false) {
         return classes.findResults {
             beanFromClass(it, isUpgrade)
         }.collectEntries {
@@ -204,7 +208,7 @@ class Summer {
         }
     }
 
-    Map<String, Object> beansFromPackage(PackageScan packageScan, boolean isUpgrade = false) {
+    protected Map<String, Object> beansFromPackage(PackageScan packageScan, boolean isUpgrade = false) {
         if (!isUpgrade) {
             watchPackages.add(packageScan)
         }
