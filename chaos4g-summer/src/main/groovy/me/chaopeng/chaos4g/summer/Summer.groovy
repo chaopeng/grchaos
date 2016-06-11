@@ -356,11 +356,7 @@ class Summer {
     }
 
     public <T> Map<String, T> getBeansByType(String clazzName) {
-        Map<String, T> res = [:]
-
-        namedBeans.findAll { _, v -> v.class.name == clazzName }.each { k, v -> res.put(k, (T) v) }
-
-        return res
+        return getBeansByType(classLoader.findClass(clazzName))
     }
 
     public <T> Map<String, T> getBeansByType(Class<T> clazz) {

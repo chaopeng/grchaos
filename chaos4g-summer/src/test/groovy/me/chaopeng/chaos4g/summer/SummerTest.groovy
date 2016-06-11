@@ -77,6 +77,12 @@ class SummerTest extends Specification {
                         "class1", "class2", "class3", "class1Inner",
                         "srcClass1", "srcClass1Inner", "srcClass2"
                 ].sort()
+
+        summer.getBeansByType(GroovyObject.class.name).keySet().sort() ==
+                [
+                        "class1", "class2", "class3", "class1Inner",
+                        "srcClass1", "srcClass1Inner", "srcClass2"
+                ].sort()
     }
 
     def "inject & injectMe"(){
