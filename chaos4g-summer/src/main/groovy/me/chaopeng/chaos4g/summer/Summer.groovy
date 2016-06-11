@@ -194,7 +194,7 @@ class Summer {
 
     protected Multimap<String, DependencyBean> testAllDepes(Map<String, Object> m = namedBeans, Map<String, Object> deps = namedBeans) {
         Multimap<String, DependencyBean> res = ArrayListMultimap.create();
-        m.namedBeans.each { k, v ->
+        m.each { k, v ->
             ReflectUtils.getFieldsByAnnotation(v, Inject.class).each { field ->
                 def name = getBeanNameFromField(field)
                 if (!deps.containsKey(name)) {

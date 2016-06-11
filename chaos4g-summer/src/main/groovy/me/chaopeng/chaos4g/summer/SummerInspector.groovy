@@ -60,7 +60,7 @@ class SummerInspector {
      * @return all missing deps
      */
     static Multimap<String, DependencyBean> testAllDepes(Summer summer) {
-        return summer.testAllDepes(summer.namedBeans, summer.namedBeans)
+        return summer.testAllDepes()
     }
 
 

@@ -31,14 +31,14 @@ class SummerInspectorTest extends Specification {
 
     def "all beans"() {
         expect:
-        SummerInspector.allBeans(summer)*.name ==
+        SummerInspector.allBeans(summer)*.name.sort() ==
                 ["class2",
                  "class3",
                  "class1",
                  "class1Inner",
                  "srcClass1",
                  "srcClass2",
-                 "srcClass1Inner"]
+                 "srcClass1Inner"].sort()
     }
 
     def "all depes"() {
@@ -63,12 +63,35 @@ class SummerInspectorTest extends Specification {
         def missing = SummerInspector.testDeps(summer, DepsMissingClass.class.name)
 
         expect:
+        missing.size() == 1
         missing.any{
             it.name == "missing" && it.object.class == DepsMissingClass.class
         }
     }
 
-    def "test all depes"() {
+    def "test all depes: pass"() {
+        def missing = SummerInspector.testAllDepes(summer)
 
+        expect:
+        missing.isEmpty()
+    }
+
+    def "test all depes: missing"() {
+        summer = new Summer("tmp")
+        summer.loadModule(new AbstractSummerModule() {
+            @Override
+            protected void configure() {
+                fromPackage(new PackageScan(packageName: "test"))
+                bean("m", new DepsMissingClass())
+            }
+        })
+
+        def missing = SummerInspector.testAllDepes(summer)
+
+        expect:
+        missing.get("m").size() == 1
+        missing.get("m").any{
+            it.name == "missing" && it.object.class == DepsMissingClass.class
+        }
     }
 }
