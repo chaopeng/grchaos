@@ -118,8 +118,8 @@ class SrcClass3 {
         where:
         recursive | excludeInner | classes
         true      | true         | ["Class1", "Class2", "Class3", "SrcClass1", "SrcClass2"]
-        true      | false        | ["Class1", "Class1Inner", "Class3", "Class2", "SrcClass1", "SrcClass1Inner", "SrcClass2"]
-        false     | false        | ["Class1", "Class1Inner", "Class2", "SrcClass1", "SrcClass1Inner", "SrcClass2"]
+        true      | false        | ["Class1", "Class1Inner", "Class3", "Class2", "SrcClass1", "SrcClass1Inner", "SrcClass1Inner2", "SrcClass2"]
+        false     | false        | ["Class1", "Class1Inner", "Class2", "SrcClass1", "SrcClass1Inner", "SrcClass1Inner2", "SrcClass2"]
 
     }
 }
