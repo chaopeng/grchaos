@@ -1,6 +1,7 @@
 package me.chaopeng.chaos4g.summer
 
 import me.chaopeng.chaos4g.summer.bean.PackageScan
+import me.chaopeng.chaos4g.summer.bean.SummerAware
 import me.chaopeng.chaos4g.summer.exceptions.SummerException
 import spock.lang.Specification
 import test.Class1
@@ -103,6 +104,8 @@ class SummerTest extends Specification {
         expect:
         class1.class2.class == Class2.class
         class3.class1.class == Class1.class
+        class1 in SummerAware
+        class1.summer == summer
     }
 
     def "injectMe & aspest"(){

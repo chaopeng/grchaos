@@ -31,7 +31,7 @@ class ReflectUtilsTest extends Specification {
 
     def "GetFieldsByAnnotation"() {
         expect:
-        ReflectUtils.getFieldsByAnnotation(new Class1.Class1Inner(), Inject.class).collect {it.name}.sort() == ["class1", "class2"].sort()
+        ReflectUtils.getFieldsByAnnotation(new Class1.Class1Inner(), Inject.class).collect {it.name}.sort() == ["srcClass1", "class2"].sort()
     }
 
     def "call mathod"() {
@@ -45,7 +45,7 @@ class ReflectUtilsTest extends Specification {
 
     def "get set field"() {
         def obj = new Class1.Class1Inner()
-        def field = getFieldByName(obj, "class1")
+        def field = getFieldByName(obj, "srcClass1")
 
         expect:
         ReflectUtils.setField(obj, field, 1)

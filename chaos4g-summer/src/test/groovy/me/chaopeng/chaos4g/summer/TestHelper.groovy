@@ -24,8 +24,16 @@ import me.chaopeng.chaos4g.summer.ioc.annotations.Bean
 @Bean
 class SrcClass1 {
 
+    def hello(){
+        "hello"
+    }
+
     @Bean("srcClass1Inner")
     static class SrcClass1Inner {
+
+    }
+
+    static class SrcClass1Inner2 {
 
     }
 

@@ -81,6 +81,10 @@ class Summer {
         module.start()
     }
 
+    synchronized void reload(){
+        classLoader.reload()
+    }
+
     @Subscribe
     synchronized void upgrade(ClassChanges changes) {
 
@@ -123,6 +127,7 @@ class Summer {
                         if (b != null) {
                             // add bean
                             newNamedBeans.put(b.name, b.object)
+                            upgradedBeans.put(b.name, b.object)
                         }
                     }
                 }
@@ -151,7 +156,7 @@ class Summer {
 
                 anonymousBeans.removeAll { it.get() == null }
                 anonymousBeans.each {
-                    doInject(it, upgradedBeans, true)
+                    doInject(it.get(), upgradedBeans, true)
                 }
 
                 // replace
