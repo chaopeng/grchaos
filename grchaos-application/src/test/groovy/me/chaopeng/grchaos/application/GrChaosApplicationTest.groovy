@@ -9,12 +9,12 @@ import me.chaopeng.grchaos.summer.bean.PackageScan
 import spock.lang.Specification
 
 /**
- * me.chaopeng.chao4g.application.Chaos4gApplicationTest
+ * me.chaopeng.chao4g.application.GrChaosApplicationTest
  *
  * @author chao
  * @version 1.0 - 2016-06-15
  */
-class Chaos4gApplicationTest extends Specification {
+class GrChaosApplicationTest extends Specification {
 
     def setup() {
         TestHelper.reloadableClassesSetup()
@@ -25,6 +25,20 @@ class Chaos4gApplicationTest extends Specification {
         new File("application.conf").delete()
     }
 
+    def config = new GrChaosApplicationConfigure(
+            srcPath: 'tmp',
+            autoReload: false,
+            summerModule: 'me.chaopeng.grchaos.application.GrChaosApplicationTest$TestSummerModule',
+            debug: false
+    )
+
+    def configStr = '''
+srcPath='tmp'
+autoReload=false
+summerModule='me.chaopeng.grchaos.application.GrChaosApplicationTest$TestSummerModule'
+debug=false
+'''
+
     static class TestSummerModule extends AbstractSummerModule {
         @Override
         protected void configure() {
@@ -33,14 +47,8 @@ class Chaos4gApplicationTest extends Specification {
     }
 
     def "from configure: success"() {
-        def config = new Chaos4gApplicationConfigure(
-                srcPath: 'tmp',
-                autoReload: false,
-                summerModule: 'me.chaopeng.chao4g.application.Chaos4gApplicationTest$TestSummerModule',
-                debug: false
-        )
 
-        def application = Chaos4gApplication.fromConfigure(config)
+        def application = GrChaosApplication.fromConfigure(config)
 
         expect:
         SummerInspector.allBeans(application.summer)*.name.sort() ==
@@ -55,14 +63,14 @@ class Chaos4gApplicationTest extends Specification {
 
     def "from configure: failed - summer module not found"() {
         when:
-        def config = new Chaos4gApplicationConfigure(
+        def config = new GrChaosApplicationConfigure(
                 srcPath: 'tmp',
                 autoReload: false,
                 summerModule: 'me.chaopeng.chao4g.application.TestSummerModule',
                 debug: false
         )
 
-        Chaos4gApplication.fromConfigure(config)
+        GrChaosApplication.fromConfigure(config)
 
         then:
         thrown(ClassNotFoundException)
@@ -70,27 +78,21 @@ class Chaos4gApplicationTest extends Specification {
 
     def "from configure: failed - module field is not summer module"() {
         when:
-        def config = new Chaos4gApplicationConfigure(
+        def config = new GrChaosApplicationConfigure(
                 srcPath: 'tmp',
                 autoReload: false,
-                summerModule: 'me.chaopeng.chao4g.application.Chaos4gApplicationTest',
+                summerModule: 'me.chaopeng.grchaos.application.GrChaosApplicationTest',
                 debug: false
         )
 
-        Chaos4gApplication.fromConfigure(config)
+        GrChaosApplication.fromConfigure(config)
 
         then:
         thrown(AssertionError)
     }
 
     def "from string"() {
-        def config = '''
-srcPath='tmp'
-autoReload=false
-summerModule='me.chaopeng.chao4g.application.Chaos4gApplicationTest$TestSummerModule'
-debug=false
-'''
-        def application = Chaos4gApplication.fromString(config)
+        def application = GrChaosApplication.fromString(configStr)
 
         expect:
         SummerInspector.allBeans(application.summer)*.name.sort() ==
@@ -104,15 +106,9 @@ debug=false
     }
 
     def "from fs file"() {
-        def config = '''
-srcPath='tmp'
-autoReload=false
-summerModule='me.chaopeng.chao4g.application.Chaos4gApplicationTest$TestSummerModule'
-debug=false
-'''
-        Files.write(config, new File("application.conf"), Charsets.UTF_8)
+        Files.write(configStr, new File("application.conf"), Charsets.UTF_8)
 
-        def application = Chaos4gApplication.fromFile("file://application.conf")
+        def application = GrChaosApplication.fromFile("file://application.conf")
 
         expect:
         SummerInspector.allBeans(application.summer)*.name.sort() ==
@@ -127,7 +123,7 @@ debug=false
     }
 
     def "from classpath file"() {
-        def application = Chaos4gApplication.fromFile("classpath://app.conf")
+        def application = GrChaosApplication.fromFile("classpath://app.conf")
 
         expect:
         SummerInspector.allBeans(application.summer)*.name.sort() ==
@@ -141,15 +137,9 @@ debug=false
     }
 
     def "auto"() {
-        def config = '''
-srcPath='tmp'
-autoReload=false
-summerModule='me.chaopeng.chao4g.application.Chaos4gApplicationTest$TestSummerModule'
-debug=false
-'''
-        Files.write(config, new File("application.conf"), Charsets.UTF_8)
+        Files.write(configStr, new File("application.conf"), Charsets.UTF_8)
 
-        def application = Chaos4gApplication.auto()
+        def application = GrChaosApplication.auto()
         expect:
         SummerInspector.allBeans(application.summer)*.name.sort() ==
                 ["class2",

@@ -7,17 +7,17 @@ import me.chaopeng.grchaos.summer.AbstractSummerModule
 import me.chaopeng.grchaos.summer.Summer
 
 /**
- * me.chaopeng.chao4g.application.Chaos4gApplication
+ * me.chaopeng.chao4g.application.GrChaosApplication
  *
  * @author chao
  * @version 1.0 - 2016-06-15
  */
-class Chaos4gApplication {
+class GrChaosApplication {
 
     public final Summer summer
-    public final Chaos4gApplicationConfigure configure
+    public final GrChaosApplicationConfigure configure
 
-    Chaos4gApplication(Summer summer, Chaos4gApplicationConfigure configure) {
+    GrChaosApplication(Summer summer, GrChaosApplicationConfigure configure) {
         this.summer = summer
         this.configure = configure
     }
@@ -31,7 +31,7 @@ class Chaos4gApplication {
         summer.reload()
     }
 
-    static Chaos4gApplication fromConfigure(Chaos4gApplicationConfigure configure) {
+    static GrChaosApplication fromConfigure(GrChaosApplicationConfigure configure) {
 
         Summer s = new Summer(configure.srcPath, configure.autoReload)
 
@@ -45,18 +45,18 @@ class Chaos4gApplication {
 
         s.loadModule(module)
 
-        Chaos4gApplication application = new Chaos4gApplication(s, configure)
+        GrChaosApplication application = new GrChaosApplication(s, configure)
 
         return application
     }
 
-    static Chaos4gApplication fromString(String s) {
+    static GrChaosApplication fromString(String s) {
         def configure = new ConfigSlurper().parse(s)
 
-        return fromConfigure(configure as Chaos4gApplicationConfigure)
+        return fromConfigure(configure as GrChaosApplicationConfigure)
     }
 
-    static Chaos4gApplication fromFile(String filePath) {
+    static GrChaosApplication fromFile(String filePath) {
         if (filePath.startsWith("file://")) {
             return fromFileSystemFile(filePath.replace("file://", ""))
         } else if (filePath.startsWith("classpath://")) {
@@ -65,12 +65,12 @@ class Chaos4gApplication {
         return null
     }
 
-    static Chaos4gApplication fromFileSystemFile(String filePath) {
+    static GrChaosApplication fromFileSystemFile(String filePath) {
         def s = Files.toString(new File(filePath), Charsets.UTF_8)
         return fromString(s)
     }
 
-    static Chaos4gApplication fromClassPathFile(String filePath) {
+    static GrChaosApplication fromClassPathFile(String filePath) {
         URL url = Resources.getResource(filePath)
         def s = Resources.toString(url, Charsets.UTF_8)
         return fromString(s)
@@ -84,7 +84,7 @@ class Chaos4gApplication {
      * </ol>
      * @return
      */
-    static Chaos4gApplication auto() {
+    static GrChaosApplication auto() {
 
         try {
             return fromClassPathFile("application.conf")
