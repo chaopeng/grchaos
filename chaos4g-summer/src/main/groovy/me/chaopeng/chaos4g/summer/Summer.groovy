@@ -47,7 +47,7 @@ class Summer {
         classLoader.eventBus.register(this)
     }
 
-    protected SummerClassLoader getClassLoader() {
+    public SummerClassLoader getClassLoader() {
         return classLoader
     }
 
@@ -68,7 +68,7 @@ class Summer {
         }
     }
 
-    synchronized void start() {
+    synchronized void preStart(){
         // check all dependencies
         def missing = testAllDepes()
         if (!missing.isEmpty()) {
@@ -78,6 +78,9 @@ class Summer {
         doInject()
         doAddAspect()
         doInitializate()
+    }
+
+    synchronized void start() {
         module.start()
     }
 

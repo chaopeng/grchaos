@@ -1,0 +1,18 @@
+dependencies {
+    compile project(':chaos4g-summer')
+    compile(
+            libs.groovy,
+            libs.guava,
+            libs.slf4j,
+            libs.rxgroovy
+    )
+
+    testCompile project(':chaos4g-summer').sourceSets.test.output
+    testCompile(
+            libs.spock
+    )
+
+    runtime(
+            libs.logback
+    )
+}

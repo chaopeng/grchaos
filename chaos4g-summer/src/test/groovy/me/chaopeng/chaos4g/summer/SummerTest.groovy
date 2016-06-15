@@ -94,7 +94,7 @@ class SummerTest extends Specification {
                 fromPackage(new PackageScan(packageName: "test", recursive: false))
             }
         })
-        summer.start()
+        summer.preStart()
 
         def class1 = summer.getBean("class1")
 
@@ -116,7 +116,7 @@ class SummerTest extends Specification {
                 fromPackage(new PackageScan(packageName: "test", recursive: false))
             }
         })
-        summer.start()
+        summer.preStart()
 
         Class3 class3 = new Class3()
 
@@ -140,7 +140,7 @@ class SummerTest extends Specification {
                 fromPackage(new PackageScan(packageName: "test", recursive: true))
             }
         })
-        summer.start()
+        summer.preStart()
 
         Class3 class3 = summer.getBean("class3")
 
