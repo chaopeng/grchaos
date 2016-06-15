@@ -1,6 +1,6 @@
-# Chaos Framework for Groovy
+# Groovy Chaos Application
 
-chaos4g(Chaos Framework for Groovy) is a framework designed to make a groovy application support hotswap. 
+grchaos(Groovy Chaos Application) is an application framework designed to make a groovy application support hotswap. 
 
 ------------------------
 

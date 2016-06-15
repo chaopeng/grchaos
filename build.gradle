@@ -5,6 +5,8 @@ plugins {
 apply plugin: 'groovy'
 apply plugin: 'idea'
 
+ext.v='1.0.0-alpha'
+
 subprojects {
 
 	apply plugin: 'groovy'
@@ -17,7 +19,7 @@ subprojects {
 
     ext.isProject = new File(projectDir.path + '/build.gradle').exists()
 
-	group='me.chaopeng.chaos4g'
+	group='me.chaopeng.grchaos'
     project.version = rootProject.v
 
     repositories {
