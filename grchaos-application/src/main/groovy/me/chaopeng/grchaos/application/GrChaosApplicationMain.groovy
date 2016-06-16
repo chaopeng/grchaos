@@ -47,7 +47,6 @@ class GrChaosApplicationMain {
 
         // else start a command line interface
         else {
-            application.summer.preStart()
             GrChaosDevelopmentMode developmentMode = new GrChaosDevelopmentMode(application)
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in))
             while (true) {
