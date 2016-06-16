@@ -33,7 +33,7 @@ class DirUtilsTest extends Specification {
 
     def cleanup(){
         def tmp = new File("tmp")
-        tmp.deleteDir();
+        tmp.deleteDir()
     }
 
 

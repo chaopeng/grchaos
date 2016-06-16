@@ -79,7 +79,7 @@ class DirUtils {
      * rm -rf $path
      */
     static void rm(String path) {
-        File file = new File(path);
+        File file = new File(path)
 
         if (file.isDirectory()) {
             file.deleteDir()

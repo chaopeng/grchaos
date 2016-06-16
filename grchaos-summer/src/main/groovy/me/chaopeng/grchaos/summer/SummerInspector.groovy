@@ -20,7 +20,7 @@ class SummerInspector {
     }
 
     static Multimap<String, String> allDepes(Summer summer) {
-        Multimap<String, String> res = ArrayListMultimap.create();
+        Multimap<String, String> res = ArrayListMultimap.create()
         summer.namedBeans.each { k, v ->
             ReflectUtils.getFieldsByAnnotation(v, Inject.class).each { field ->
                 def name = Summer.getBeanNameFromField(field)

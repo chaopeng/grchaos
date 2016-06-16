@@ -22,7 +22,7 @@ class FileWatcher {
     private final WatchService watchService
     private final File dir
     private Map<String, String> md5s = new HashMap<>()
-    private long lastModified;
+    private long lastModified
 
     FileWatcher(String filepath) {
         Path path = Paths.get(filepath)

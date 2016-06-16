@@ -60,7 +60,7 @@ class SrcClass2 {
 
     static def reloadableClassesCleanup() {
         def tmp = new File("tmp")
-        tmp.deleteDir();
+        tmp.deleteDir()
     }
 
 }

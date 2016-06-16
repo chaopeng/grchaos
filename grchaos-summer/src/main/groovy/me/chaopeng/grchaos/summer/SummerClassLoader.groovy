@@ -21,10 +21,10 @@ import me.chaopeng.grchaos.summer.utils.FileWatcher
 class SummerClassLoader {
 
     private def gcl = new GroovyClassLoader()
-    private String srcRoot;
+    private String srcRoot
     private Map<String, List<Class>> fileToClasses = new HashMap<>()
     private FileWatcher fileWatcher
-    protected EventBus eventBus = new EventBus();
+    protected EventBus eventBus = new EventBus()
 
     private SummerClassLoader() {
         gcl.class.getDeclaredMethods().each {
@@ -48,10 +48,10 @@ class SummerClassLoader {
             try {
 
                 if (srcRoot == null) {
-                    this.srcRoot = "src/";
+                    this.srcRoot = "src/"
                 }
 
-                this.srcRoot = srcRoot;
+                this.srcRoot = srcRoot
 
                 DirUtils.recursive(srcRoot, FileType.FILES, ~/\.groovy$/).each {
                     parseClass(it)
@@ -124,7 +124,7 @@ class SummerClassLoader {
             clazz = Class.forName(name)
         }
 
-        clazz;
+        return clazz
     }
 
 
@@ -134,7 +134,7 @@ class SummerClassLoader {
         unloadClasses(file)
 
         // compile
-        def clazz = gcl.parseClass(new GroovyCodeSource(file, "UTF-8"), false);
+        def clazz = gcl.parseClass(new GroovyCodeSource(file, "UTF-8"), false)
 
         // file - classes
         List<Class> loadedClasses = gcl.getLoadedClasses().findAll { cls ->
@@ -155,7 +155,7 @@ class SummerClassLoader {
     }
 
     private void unloadClasses(File file) {
-        MetaClassRegistry metaClassRegistry = GroovySystem.getMetaClassRegistry();
+        MetaClassRegistry metaClassRegistry = GroovySystem.getMetaClassRegistry()
         fileToClasses.get(file.absolutePath)?.each { clazz ->
             metaClassRegistry.removeMetaClass(clazz)
         }

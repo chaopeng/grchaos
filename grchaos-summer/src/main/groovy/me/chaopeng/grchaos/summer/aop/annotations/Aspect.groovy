@@ -16,8 +16,8 @@ import java.lang.annotation.Target
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @interface Aspect {
-    String handler();
-    Type type() default Type.PUBLIC;
+    String handler()
+    Type type() default Type.PUBLIC
 
     /**
      * @see AspectMe

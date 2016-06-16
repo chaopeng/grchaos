@@ -40,7 +40,8 @@ class Summer {
     private List<WeakReference<Object>> anonymousBeans = new LinkedList<>()
     private List<PackageScan> watchPackages = new LinkedList<>()
     private Set<String> watchClasses = new HashSet<>()
-    private boolean isInit = false
+    private int stage = 0 // none(0), init-ed(1), prestart-ed(2), start-ed(3)
+
 
     Summer(String srcRoot = null, boolean autoReload = false) {
         classLoader = SummerClassLoader.create(srcRoot)
@@ -56,32 +57,39 @@ class Summer {
 ////////////////////////////////////
 
     synchronized void loadModule(AbstractSummerModule module) {
-        if (!isInit) {
+        if (stage == 0) {
             this.module = module
             module.summer = this
             module.configure()
-            isInit = true
+            stage++
 
-            Runtime.getRuntime().addShutdownHook({
+            Runtime.getRuntime().addShutdownHook{
                 stop()
-            });
+            }
         }
     }
 
     synchronized void preStart(){
-        // check all dependencies
-        def missing = testAllDepes()
-        if (!missing.isEmpty()) {
-            throw missingDepesException(missing)
-        }
+        if (stage == 1) {
+            // check all dependencies
+            def missing = testAllDepes()
+            if (!missing.isEmpty()) {
+                throw missingDepesException(missing)
+            }
 
-        doInject()
-        doAddAspect()
-        doInitializate()
+            doInject()
+            doAddAspect()
+            doInitializate()
+
+            stage++
+        }
     }
 
     synchronized void start() {
-        module.start()
+        if (stage == 2) {
+            module.start()
+            stage++
+        }
     }
 
     synchronized void reload(){
@@ -201,7 +209,7 @@ class Summer {
     }
 
     protected Multimap<String, DependencyBean> testAllDepes(Map<String, Object> m = namedBeans, Map<String, Object> deps = namedBeans) {
-        Multimap<String, DependencyBean> res = ArrayListMultimap.create();
+        Multimap<String, DependencyBean> res = ArrayListMultimap.create()
         m.each { k, v ->
             ReflectUtils.getFieldsByAnnotation(v, Inject.class).each { field ->
                 def name = getBeanNameFromField(field)
@@ -384,7 +392,7 @@ class Summer {
             res.put(k, (T) v)
         }
 
-        return res;
+        return res
     }
 
 }
