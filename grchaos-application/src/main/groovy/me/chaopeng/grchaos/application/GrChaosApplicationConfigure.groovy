@@ -11,7 +11,7 @@ class GrChaosApplicationConfigure {
     private String srcPath
     private boolean autoReload
     private String summerModule
-    private boolean debug
+    private boolean developmentMode
 
     String getSrcPath() {
         return srcPath
@@ -25,7 +25,16 @@ class GrChaosApplicationConfigure {
         return summerModule
     }
 
-    boolean getDebug() {
-        return debug
+    boolean getDevelopmentMode() {
+        return developmentMode
+    }
+
+
+    @Override
+    public String toString() {
+        return "srcPath='" + srcPath + '\'' +
+                "\nautoReload=" + autoReload +
+                "\nsummerModule='" + summerModule + '\'' +
+                "\ndevelopmentMode=" + developmentMode
     }
 }

@@ -29,14 +29,14 @@ class GrChaosApplicationTest extends Specification {
             srcPath: 'tmp',
             autoReload: false,
             summerModule: 'me.chaopeng.grchaos.application.GrChaosApplicationTest$TestSummerModule',
-            debug: false
+            developmentMode: false
     )
 
     def configStr = '''
 srcPath='tmp'
 autoReload=false
 summerModule='me.chaopeng.grchaos.application.GrChaosApplicationTest$TestSummerModule'
-debug=false
+developmentMode=false
 '''
 
     static class TestSummerModule extends AbstractSummerModule {
@@ -67,7 +67,7 @@ debug=false
                 srcPath: 'tmp',
                 autoReload: false,
                 summerModule: 'me.chaopeng.chao4g.application.TestSummerModule',
-                debug: false
+                developmentMode: false
         )
 
         GrChaosApplication.fromConfigure(config)
@@ -82,7 +82,7 @@ debug=false
                 srcPath: 'tmp',
                 autoReload: false,
                 summerModule: 'me.chaopeng.grchaos.application.GrChaosApplicationTest',
-                debug: false
+                developmentMode: false
         )
 
         GrChaosApplication.fromConfigure(config)
