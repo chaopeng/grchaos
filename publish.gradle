@@ -1,0 +1,36 @@
+apply plugin: 'com.bmuschko.nexus'
+apply plugin: 'io.codearte.nexus-staging'
+
+nexusStaging {
+    packageGroup = 'me.chaopeng'
+}
+modifyPom {
+    project {
+        name 'grchaos'
+        description 'application framework for hotswap'
+        url 'https://github.com/chaopeng/grchaos'
+        inceptionYear '2016'
+
+        scm {
+            url 'https://github.com/chaopeng/grchaos'
+            connection 'scm:https://github.com/chaopeng/grchaos.git'
+            developerConnection 'scm:https://github.com/chaopeng/grchaos.git'
+        }
+
+        licenses {
+            license {
+                name 'The BSD 3-Clause License'
+                url 'https://raw.githubusercontent.com/chaopeng/grchaos/master/License'
+                distribution 'repo'
+            }
+        }
+
+        developers {
+            developer {
+                id 'chaopeng'
+                name 'chaopeng'
+                email 'chaojianpeng@gmail.com'
+            }
+        }
+    }
+}

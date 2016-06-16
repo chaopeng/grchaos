@@ -1,9 +1,23 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        //Needed only for SNAPSHOT versions
+        //maven { url "http://oss.sonatype.org/content/repositories/snapshots/" }
+    }
+    dependencies {
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
+    }
+}
+
 plugins {
     id "com.github.ben-manes.versions" version "0.12.0"
+    id "com.bmuschko.nexus" version "2.3.1"
 }
+
 
 apply plugin: 'groovy'
 apply plugin: 'idea'
+apply plugin: 'signing'
 
 ext.v='1.0.0-alpha'
 
@@ -12,6 +26,7 @@ subprojects {
 	apply plugin: 'groovy'
     apply plugin: 'com.github.ben-manes.versions'
     apply from: rootDir.path + '/libraries.gradle'
+    apply from: rootDir.path + '/publish.gradle'
 
     compileJava.options.encoding = 'UTF-8'
     sourceCompatibility = JavaVersion.VERSION_1_8
