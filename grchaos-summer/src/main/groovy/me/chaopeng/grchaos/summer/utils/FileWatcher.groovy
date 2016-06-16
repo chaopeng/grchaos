@@ -1,9 +1,8 @@
 package me.chaopeng.grchaos.summer.utils
 
-import com.google.common.hash.Hashing
-import groovy.io.FileType
 import groovy.util.logging.Slf4j
 import me.chaopeng.grchaos.summer.bean.Changes
+import me.chaopeng.grchaos.summer.bean.DirInfo
 import rx.Observable
 import rx.schedulers.Schedulers
 
@@ -20,21 +19,19 @@ import java.util.concurrent.TimeUnit
 class FileWatcher {
 
     private final WatchService watchService
-    private final File dir
-    private Map<String, String> md5s = new HashMap<>()
-    private long lastModified
+    private final List<DirInfo> dirs = []
 
-    FileWatcher(String filepath) {
-        Path path = Paths.get(filepath)
-
+    FileWatcher(String filepaths) {
         watchService = FileSystems.getDefault().newWatchService()
-        path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE)
 
-        dir = new File(filepath)
-        lastModified = dir.lastModified()
+        filepaths.split(",").each { filepath ->
+            Path path = Paths.get(filepath)
 
-        DirUtils.recursive(filepath, FileType.FILES).each { file ->
-            md5s.put(file.path, com.google.common.io.Files.hash(file, Hashing.md5()).toString())
+            path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE)
+
+            def dirInfo = new DirInfo(filepath)
+
+            dirs << dirInfo
         }
     }
 
@@ -43,11 +40,21 @@ class FileWatcher {
      * @return
      */
     boolean isChange() {
+
+        def isChange = false
+
         WatchKey key = watchService.poll()
-        def res = (key != null) || (lastModified != dir.lastModified())
-        lastModified = dir.lastModified()
-        key?.reset()
-        res
+
+        while (key != null) {
+            key = watchService.poll()
+            key?.reset()
+            isChange = true
+        }
+
+        if (!isChange) {
+            isChange = dirs*.isModified().any { it }
+        }
+        return isChange
     }
 
     /**
@@ -56,45 +63,19 @@ class FileWatcher {
      */
     Changes<File> changes() {
         Changes<File> res = new Changes<>()
-        Map<String, String> newMd5s = new HashMap<>()
 
-        DirUtils.recursive(dir.path, FileType.FILES).each { file ->
-            def md5 = com.google.common.io.Files.hash(file, Hashing.md5()).toString()
+        dirs*.changes(res)
 
-            // new
-            if (!md5s.containsKey(file.path)) {
-                res.adds.add(file)
-            }
-
-            // change
-            else {
-                def oldMd5 = md5s.get(file.path)
-                if (oldMd5 != md5) {
-                    res.changes.add(file)
-                }
-            }
-
-            newMd5s.put(file.path, md5)
-        }
-
-        md5s.keySet().each { file ->
-            if (!newMd5s.containsKey(file)) {
-                res.deletes.add(new File(file))
-            }
-        }
-
-        md5s = newMd5s
-
-        res
+        return res
     }
 
     /**
-     * @param path will watch
+     * @param paths will watch
      * @param intervalSecond
      * @param closure{Changes -> ...}
      */
-    static FileWatcher watchDir(String path, int intervalSecond, Closure closure) throws IOException {
-        FileWatcher fileWatcher = new FileWatcher(path)
+    static FileWatcher watchDir(String paths, int intervalSecond, Closure closure) throws IOException {
+        FileWatcher fileWatcher = new FileWatcher(paths)
 
         Observable.interval(intervalSecond, intervalSecond, TimeUnit.SECONDS).observeOn(Schedulers.newThread()).subscribe{
 

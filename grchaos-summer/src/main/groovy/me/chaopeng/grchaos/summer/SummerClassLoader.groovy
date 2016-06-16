@@ -21,10 +21,10 @@ import me.chaopeng.grchaos.summer.utils.FileWatcher
 class SummerClassLoader {
 
     private def gcl = new GroovyClassLoader()
-    private String srcRoot
     private Map<String, List<Class>> fileToClasses = new HashMap<>()
     private FileWatcher fileWatcher
     protected EventBus eventBus = new EventBus()
+    private boolean initializated = false
 
     private SummerClassLoader() {
         gcl.class.getDeclaredMethods().each {
@@ -42,30 +42,32 @@ class SummerClassLoader {
         scl
     }
 
-    synchronized void loadSrc(String srcRoot, boolean autoReload) {
-        if (this.srcRoot == null) {
+    synchronized void loadSrc(String srcPaths, boolean autoReload) {
+        if (!this.initializated) {
 
             try {
 
-                if (srcRoot == null) {
-                    this.srcRoot = "src/"
+                if (srcPaths == null) {
+                    srcPaths = "src/"
                 }
 
-                this.srcRoot = srcRoot
-
-                DirUtils.recursive(srcRoot, FileType.FILES, ~/\.groovy$/).each {
-                    parseClass(it)
+                srcPaths.split(",").each { srcPath ->
+                    DirUtils.recursive(srcPath, FileType.FILES, ~/\.groovy$/).each {
+                        parseClass(it)
+                    }
                 }
 
                 // setup file system watch service
                 if (autoReload) {
-                    fileWatcher = FileWatcher.watchDir(srcRoot, 60, {
+                    fileWatcher = FileWatcher.watchDir(srcPaths, 60, {
                         def changes = reload(it as Changes<File>)
                         eventBus.post(changes)
                     })
                 } else {
-                    fileWatcher = new FileWatcher(srcRoot)
+                    fileWatcher = new FileWatcher(srcPaths)
                 }
+
+                initializated = true
             } catch (Exception e) {
                 throw new SummerException(e)
             }
