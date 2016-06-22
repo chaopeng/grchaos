@@ -11,7 +11,7 @@ import me.chaopeng.grchaos.summer.utils.DirUtils
  * @version 1.0 - 2016-06-10
  */
 class SummerClassLoaderGCTest {
-    public static void main(String[] args) {
+    static void main(String[] args) {
         TestHelper.reloadableClassesSetup()
         SummerClassLoader scl = SummerClassLoader.create("tmp")
         Changes<File> changes = new Changes<>()

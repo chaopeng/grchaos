@@ -136,7 +136,7 @@ class ClassPathScanner {
         }
         final boolean fileRecursive = recursive
         File[] dirfiles = dir.listFiles(new FileFilter() {
-            public boolean accept(File file) {
+            boolean accept(File file) {
                 if (file.isDirectory()) {
                     return fileRecursive
                 }

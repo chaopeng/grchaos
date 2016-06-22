@@ -14,20 +14,20 @@ import me.chaopeng.grchaos.summer.Summer
  */
 class GrChaosApplication {
 
-    public final Summer summer
-    public final GrChaosApplicationConfigure configure
+    final Summer summer
+    final GrChaosApplicationConfigure configure
 
     GrChaosApplication(Summer summer, GrChaosApplicationConfigure configure) {
         this.summer = summer
         this.configure = configure
     }
 
-    public void start() {
+    void start() {
         summer.preStart()
         summer.start()
     }
 
-    public void reload() {
+    void reload() {
         summer.reload()
     }
 

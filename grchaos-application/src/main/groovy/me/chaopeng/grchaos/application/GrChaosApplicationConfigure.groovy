@@ -31,7 +31,7 @@ class GrChaosApplicationConfigure {
 
 
     @Override
-    public String toString() {
+    String toString() {
         return "srcPath='" + srcPath + '\'' +
                 "\nautoReload=" + autoReload +
                 "\nsummerModule='" + summerModule + '\'' +

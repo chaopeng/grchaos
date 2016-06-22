@@ -19,7 +19,7 @@ class GrChaosApplicationMain {
  \\______| | _| `._____| \\______||__|  |__| /__/     \\__\\ \\______/  |_______/
 '''
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
 
         def GrChaosApplication application
 

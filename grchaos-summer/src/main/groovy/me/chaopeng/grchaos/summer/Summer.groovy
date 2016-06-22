@@ -48,7 +48,7 @@ class Summer {
         classLoader.eventBus.register(this)
     }
 
-    public SummerClassLoader getClassLoader() {
+    SummerClassLoader getClassLoader() {
         return classLoader
     }
 
