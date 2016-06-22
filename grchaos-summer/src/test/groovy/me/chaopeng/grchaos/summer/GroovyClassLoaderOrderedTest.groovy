@@ -15,58 +15,12 @@ class GroovyClassLoaderOrderedTest extends Specification {
 
     def gcl = new GroovyClassLoader()
 
-    def setup() {
-
-        DirUtils.mkdir("tmp")
-
-        def srcClass1 = '''\
-package test
-
-import me.chaopeng.grchaos.summer.ioc.annotations.Bean
-
-@Bean
-class SrcClass1 {
-
-    def hello(){
-        "hello"
+    def setup(){
+        TestClassWithDepend.setup()
     }
 
-    @Bean("srcClass1Inner")
-    static class SrcClass1Inner {
-
-    }
-
-    static class SrcClass1Inner2 {
-
-    }
-
-}
-        '''
-
-        def srcClass2 = '''\
-package test
-
-import me.chaopeng.grchaos.summer.ioc.annotations.Bean
-import test.SrcClass1
-
-@Bean
-class SrcClass2 {
-
-    SrcClass1 srcClass1
-
-    def hello(){
-        "hello"
-    }
-}
-'''
-        Files.write(srcClass1, new File("tmp/SrcClass1.groovy"), Charsets.UTF_8)
-        Files.write(srcClass2, new File("tmp/SrcClass2.groovy"), Charsets.UTF_8)
-
-    }
-
-    def cleanup() {
-        def tmp = new File("tmp")
-        tmp.deleteDir()
+    def cleanup(){
+        TestClassWithDepend.cleanup()
     }
 
     def "load in order"(){

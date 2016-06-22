@@ -1,8 +1,6 @@
 package me.chaopeng.grchaos.summer
 
-import groovy.io.FileType
-import me.chaopeng.grchaos.summer.bean.Changes
-import me.chaopeng.grchaos.summer.utils.DirUtils
+import me.chaopeng.grchaos.summer.utils.GroovyCompileHelper
 
 /**
  * me.chaopeng.grchaos.summer.SummerClassLoaderGCTest
@@ -12,16 +10,16 @@ import me.chaopeng.grchaos.summer.utils.DirUtils
  */
 class SummerClassLoaderGCTest {
     static void main(String[] args) {
-        TestHelper.reloadableClassesSetup()
-        SummerClassLoader scl = SummerClassLoader.create("tmp")
-        Changes<File> changes = new Changes<>()
-
-        changes.adds.addAll( DirUtils.recursive("tmp", FileType.FILES, ~/\.groocy$/))
+        TestClassWithDepend.setup()
 
         while (true) {
-            scl.reload(changes)
+            def gcl = new GroovyClassLoader()
 
-            sleep(100)
+            def classes = GroovyCompileHelper.compile(gcl, ["tmp"])
+
+            sleep(1)
+
+            GroovyCompileHelper.unloadClasses(classes)
         }
     }
 }

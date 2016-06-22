@@ -52,7 +52,7 @@ class SummerClassLoader {
                 }
 
                 srcPaths.split(",").each { srcPath ->
-                    DirUtils.recursive(srcPath, FileType.FILES, ~/\.groovy$/).each {
+                    DirUtils.recursive(srcPath, FileType.FILES, ~/\.groovy/).each {
                         parseClass(it)
                     }
                 }

@@ -60,6 +60,7 @@ class DirUtilsTest extends Specification {
         "tmp" | FileType.ANY          | ~/1/   | ["1.txt", "dir1"]
         "tmp" | FileType.DIRECTORIES  | ~/.*/  | ["dir1", "dir2", "dir3"]
         "tmp" | FileType.FILES        | ~/.*/  | ["1.txt", "2.txt", "3.txt"]
+        "tmp" | FileType.FILES        | ~/\.txt/  | ["1.txt", "2.txt", "3.txt"]
     }
 
     def "cp file"() {
