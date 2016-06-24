@@ -21,11 +21,6 @@ import org.codehaus.groovy.control.Phases
  */
 class GroovyCompileHelper {
     private final List<String> sourcePaths = []
-    private final GroovyClassLoader groovyClassLoader
-
-    private GroovyCompileHelper(GroovyClassLoader groovyClassLoader) {
-        this.groovyClassLoader = groovyClassLoader
-    }
 
     private GroovyCompileHelper addSourcePaths(List<String> paths) {
         if (paths != null) {
@@ -41,6 +36,9 @@ class GroovyCompileHelper {
      */
     @SuppressWarnings("unchecked")
     public Set<Class> compile0() throws SummerException {
+
+        def groovyClassLoader = new GroovyClassLoader()
+
         final CompilerConfiguration conf = CompilerConfiguration.DEFAULT
         conf.setTolerance(0)
         conf.setVerbose(true)
@@ -93,9 +91,9 @@ class GroovyCompileHelper {
         }
     }
 
-    static Set<Class> compile(GroovyClassLoader groovyClassLoader, List<String> paths) {
+    static Set<Class> compile(List<String> paths) {
 
-        def helper = new GroovyCompileHelper(groovyClassLoader)
+        def helper = new GroovyCompileHelper()
 
         helper.addSourcePaths(paths)
 

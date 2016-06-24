@@ -13,9 +13,7 @@ class SummerClassLoaderGCTest {
         TestClassWithDepend.setup()
 
         while (true) {
-            def gcl = new GroovyClassLoader()
-
-            def classes = GroovyCompileHelper.compile(gcl, ["tmp"])
+            def classes = GroovyCompileHelper.compile(["tmp"])
 
             sleep(1)
 

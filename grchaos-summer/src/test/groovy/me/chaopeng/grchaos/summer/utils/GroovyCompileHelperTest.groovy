@@ -22,7 +22,7 @@ class GroovyCompileHelperTest extends Specification {
     }
 
     def "compile"(){
-        def classes = GroovyCompileHelper.compile(gcl, ["tmp"])
+        def classes = GroovyCompileHelper.compile(["tmp"])
 
         expect:
         classes.size() == 4
