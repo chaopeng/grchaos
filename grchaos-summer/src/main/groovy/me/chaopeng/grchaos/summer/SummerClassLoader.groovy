@@ -22,7 +22,7 @@ class SummerClassLoader extends GroovyClassLoader {
     private List<String> srcPaths
     private Map<String, Class> loadedClasses
     private FileWatcher fileWatcher
-    protected EventBus eventBus = new EventBus()
+    protected Summer summer
     private boolean initializated = false
 
     private SummerClassLoader(String srcPaths = "src/", ClassLoader parent = Thread.currentThread().getContextClassLoader()) {
@@ -72,13 +72,19 @@ class SummerClassLoader extends GroovyClassLoader {
             }
         }
 
+        def backup = loadedClasses
         try {
+
             loadedClasses = GroovyCompileHelper.compile(this.srcPaths)
 
-            ClassChanges ret = new ClassChanges()
-            eventBus.post(ret)
+            summer?.upgrade()
+
+            log.info("Summer reload success")
+
         } catch (Exception e) {
             log.error("SummerClassLoader reload failed. err={}", e.getMessage(), e)
+
+            loadedClasses = backup
         }
 
 

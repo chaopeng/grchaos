@@ -44,7 +44,7 @@ class Summer {
 
     Summer(String srcRoot = null, boolean autoReload = false) {
         classLoader = SummerClassLoader.create(srcRoot, autoReload)
-        classLoader.eventBus.register(this)
+        classLoader.summer = this
     }
 
     SummerClassLoader getClassLoader() {
@@ -104,8 +104,7 @@ class Summer {
         classLoader.reload()
     }
 
-    @Subscribe
-    synchronized void upgrade(ClassChanges changes) {
+    synchronized void upgrade() {
 
         try {
             Map<String, Object> newNamedBeans = [:]
@@ -164,9 +163,7 @@ class Summer {
 
 
         } catch (Exception e) {
-            log.error("upgrade failed. ${e.message}", e)
-
-            // TODO revert classloader
+            throw new SummerException(e)
         }
 
     }
