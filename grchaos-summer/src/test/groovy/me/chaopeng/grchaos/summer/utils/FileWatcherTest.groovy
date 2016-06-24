@@ -14,7 +14,7 @@ class FileWatcherTest extends Specification {
 
     FileWatcher watcher
 
-    def setup(){
+    def setup() {
         DirUtils.mkdir "tmp"
         DirUtils.mkdir "tmp/dir1"
         DirUtils.mkdir "tmp/dir2"
@@ -28,10 +28,10 @@ class FileWatcherTest extends Specification {
         Files.write("2", txt2, Charsets.UTF_8)
         Files.write("3", dir1txt3, Charsets.UTF_8)
 
-        watcher = new FileWatcher("tmp")
+        watcher = new FileWatcher(["tmp"])
     }
 
-    def cleanup(){
+    def cleanup() {
         def tmp = new File("tmp")
         tmp.deleteDir()
     }
@@ -76,8 +76,8 @@ class FileWatcherTest extends Specification {
         then:
         watcher.isChange()
         def changes = watcher.changes()
-        changes.adds.collect {it.name} == ["4.txt"]
-        changes.deletes.collect {it.name} == ["1.txt"]
-        changes.changes.collect {it.name} == ["2.txt"]
+        changes.adds.collect { it.name } == ["4.txt"]
+        changes.deletes.collect { it.name } == ["1.txt"]
+        changes.changes.collect { it.name } == ["2.txt"]
     }
 }

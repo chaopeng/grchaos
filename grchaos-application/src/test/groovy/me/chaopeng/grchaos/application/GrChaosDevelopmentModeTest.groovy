@@ -35,7 +35,7 @@ class GrChaosDevelopmentModeTest extends Specification {
             developmentMode: false
     )
 
-    static class TestSummerModule extends AbstractSummerModule{
+    static class TestSummerModule extends AbstractSummerModule {
 
         @Override
         protected void configure() {

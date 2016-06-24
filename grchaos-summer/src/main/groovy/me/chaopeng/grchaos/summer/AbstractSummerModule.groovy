@@ -14,8 +14,12 @@ abstract class AbstractSummerModule {
     protected Summer summer
 
     protected abstract void configure()
-    protected void start(){}
-    protected void stop(){}
+
+    protected void mutableBeansConfigure(){}
+
+    protected void start() {}
+
+    protected void stop() {}
 
     final void bean(String name, Object obj) {
         summer.bean(name, obj)

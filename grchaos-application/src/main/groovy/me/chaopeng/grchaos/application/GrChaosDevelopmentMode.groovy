@@ -58,7 +58,7 @@ testAllDeps - test deps of all classes in SummerModule
         return res
     }
 
-    String testAllDeps(){
+    String testAllDeps() {
         def missing = SummerInspector.testAllDepes(application.summer)
 
         if (missing.isEmpty()) {
@@ -69,7 +69,7 @@ testAllDeps - test deps of all classes in SummerModule
             missing.keySet().each { k ->
                 res << "\n" << k << ":\n"
 
-                missing.get(k).each {dep ->
+                missing.get(k).each { dep ->
                     res << "    " << dep.name << "\n"
                 }
             }

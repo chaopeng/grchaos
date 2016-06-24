@@ -17,21 +17,25 @@ import java.lang.reflect.Method
 class ReflectUtilsTest extends Specification {
 
     Method getMethodByName(Object object, String name) {
-        return object.class.declaredMethods.find {name == it.name}
+        return object.class.declaredMethods.find { name == it.name }
     }
 
     Field getFieldByName(Object object, String name) {
-        return object.class.declaredFields.find {name == it.name}
+        return object.class.declaredFields.find { name == it.name }
     }
 
     def "get methods by annotation"() {
         expect:
-        ReflectUtils.getMethodsByAnnotation(new Class1.Class1Inner(), AspectMe.class).collect {it.name}.sort() == ["a", "b", "c"].sort()
+        ReflectUtils.getMethodsByAnnotation(new Class1.Class1Inner(), AspectMe.class).collect {
+            it.name
+        }.sort() == ["a", "b", "c"].sort()
     }
 
     def "GetFieldsByAnnotation"() {
         expect:
-        ReflectUtils.getFieldsByAnnotation(new Class1.Class1Inner(), Inject.class).collect {it.name}.sort() == ["srcClass1", "class2"].sort()
+        ReflectUtils.getFieldsByAnnotation(new Class1.Class1Inner(), Inject.class).collect {
+            it.name
+        }.sort() == ["srcClass1", "class2"].sort()
     }
 
     def "call mathod"() {

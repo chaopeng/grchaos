@@ -86,7 +86,7 @@ class SummerTest extends Specification {
                 ].sort()
     }
 
-    def "inject & injectMe"(){
+    def "inject & injectMe"() {
         setup:
         summer.loadModule(new AbstractSummerModule() {
             @Override
@@ -108,7 +108,7 @@ class SummerTest extends Specification {
         class1.summer == summer
     }
 
-    def "injectMe & aspest"(){
+    def "injectMe & aspest"() {
         setup:
         summer.loadModule(new AbstractSummerModule() {
             @Override
@@ -132,7 +132,7 @@ class SummerTest extends Specification {
 
     }
 
-    def "initializate & aspest"(){
+    def "initializate & aspest"() {
         setup:
         summer.loadModule(new AbstractSummerModule() {
             @Override
@@ -152,7 +152,7 @@ class SummerTest extends Specification {
 
     }
 
-    def "bean name conflict"(){
+    def "bean name conflict"() {
 
         when:
         summer.loadModule(new AbstractSummerModule() {

@@ -37,14 +37,13 @@ class Summer {
     private final SummerClassLoader classLoader
     private AbstractSummerModule module
     protected Map<String, Object> namedBeans = [:]
+    private List<String> immutableBeans
     private List<WeakReference<Object>> anonymousBeans = new LinkedList<>()
-    private List<PackageScan> watchPackages = new LinkedList<>()
-    private Set<String> watchClasses = new HashSet<>()
     private int stage = 0 // none(0), init-ed(1), prestart-ed(2), start-ed(3)
 
 
     Summer(String srcRoot = null, boolean autoReload = false) {
-        classLoader = SummerClassLoader.create(srcRoot)
+        classLoader = SummerClassLoader.create(srcRoot, autoReload)
         classLoader.eventBus.register(this)
     }
 
@@ -60,16 +59,22 @@ class Summer {
         if (stage == 0) {
             this.module = module
             module.summer = this
+
+            // load immutable beans
             module.configure()
+            immutableBeans = namedBeans.keySet().collect()
+
+            // load mutable beans
+            module.mutableBeansConfigure()
             stage++
 
-            Runtime.getRuntime().addShutdownHook{
+            Runtime.getRuntime().addShutdownHook {
                 stop()
             }
         }
     }
 
-    synchronized void preStart(){
+    synchronized void preStart() {
         if (stage == 1) {
             // check all dependencies
             def missing = testAllDepes()
@@ -92,97 +97,94 @@ class Summer {
         }
     }
 
-    synchronized void reload(){
+    synchronized void reload() {
         classLoader.reload()
     }
 
     @Subscribe
     synchronized void upgrade(ClassChanges changes) {
 
-        if (!changes.isEmpty()) {
-            try {
-                Map<String, Object> newNamedBeans = [:]
-                newNamedBeans.putAll(namedBeans)
+        try {
+            Map<String, Object> newNamedBeans = immutableBeans.collectEntries {[(it):namedBeans.get(it)]}
 
-                Map<String, Object> upgradedBeans = [:]
+            Map<String, Object> upgradedBeans = [:]
 
-                // for updates
-                changes.changes.each {
-                    // if it already a bean, replace or remove
-                    if (watchClasses.contains(it.name)) {
-                        def b = bean(it.newInstance(), true)
-                        if (b != null) {
-                            // update bean
-                            newNamedBeans.put(b.name, b.object)
-                            upgradedBeans.put(b.name, b.object)
-                        } else {
-                            // class still here just without @Bean, but we ignore it
-                        }
-                    }
-
-                    // else check is it in watchPackage
-                    else if (watchPackages.any { p -> ClassPathScanner.filter(it.name, p) }) {
-                        def b = bean(it.newInstance(), true)
-                        if (b != null) {
-                            // add bean
-                            newNamedBeans.put(b.name, b.object)
-                            upgradedBeans.put(b.name, b.object)
-                        }
+            // for updates
+            changes.changes.each {
+                // if it already a bean, replace or remove
+                if (watchClasses.contains(it.name)) {
+                    def b = bean(it.newInstance(), true)
+                    if (b != null) {
+                        // update bean
+                        newNamedBeans.put(b.name, b.object)
+                        upgradedBeans.put(b.name, b.object)
+                    } else {
+                        // class still here just without @Bean, but we ignore it
                     }
                 }
 
-                // for add
-                changes.adds.each {
-                    if (watchPackages.any { p -> ClassPathScanner.filter(it.name, p) }) {
-                        def b = bean(it.newInstance(), true)
-                        if (b != null) {
-                            // add bean
-                            newNamedBeans.put(b.name, b.object)
-                            upgradedBeans.put(b.name, b.object)
-                        }
+                // else check is it in watchPackage
+                else if (watchPackages.any { p -> ClassPathScanner.filter(it.name, p) }) {
+                    def b = bean(it.newInstance(), true)
+                    if (b != null) {
+                        // add bean
+                        newNamedBeans.put(b.name, b.object)
+                        upgradedBeans.put(b.name, b.object)
                     }
                 }
-
-                // for delete
-                changes.deletes.each {
-                    // we ignore it
-                }
-
-                // check all dependencies
-                def missing = testAllDepes(newNamedBeans, newNamedBeans)
-                if (!missing.isEmpty()) {
-                    throw missingDepesException(missing)
-                }
-
-                // inject & init new obj
-                doInject(upgradedBeans, newNamedBeans)
-                doInitializate(upgradedBeans)
-
-                // update inject in exists beans
-                newNamedBeans.findAll { k, v ->
-                    !upgradedBeans.containsKey(k)
-                }.each { k, v ->
-                    doInject(v, upgradedBeans, true)
-                }
-
-                anonymousBeans.removeAll { it.get() == null }
-                anonymousBeans.each {
-                    doInject(it.get(), upgradedBeans, true)
-                }
-
-                // replace
-                namedBeans = newNamedBeans
-
-                // notify all upgrade()
-                namedBeans.findAll { k, v ->
-                    !upgradedBeans.containsKey(k)
-                }.each { k, v ->
-                    upgradeNotify(v)
-                }
-
-            } catch (Exception e) {
-                log.error("upgrade failed. ${e.message}", e)
             }
+
+            // for add
+            changes.adds.each {
+                if (watchPackages.any { p -> ClassPathScanner.filter(it.name, p) }) {
+                    def b = bean(it.newInstance(), true)
+                    if (b != null) {
+                        // add bean
+                        newNamedBeans.put(b.name, b.object)
+                        upgradedBeans.put(b.name, b.object)
+                    }
+                }
+            }
+
+            // for delete
+            changes.deletes.each {
+                // we ignore it
+            }
+
+            // check all dependencies
+            def missing = testAllDepes(newNamedBeans, newNamedBeans)
+            if (!missing.isEmpty()) {
+                throw missingDepesException(missing)
+            }
+
+            // inject & init new obj
+            doInject(upgradedBeans, newNamedBeans)
+            doInitializate(upgradedBeans)
+
+            // update inject in exists beans
+            newNamedBeans.findAll { k, v ->
+                !upgradedBeans.containsKey(k)
+            }.each { k, v ->
+                doInject(v, upgradedBeans, true)
+            }
+
+            anonymousBeans.removeAll { it.get() == null }
+            anonymousBeans.each {
+                doInject(it.get(), upgradedBeans, true)
+            }
+
+            // replace
+            namedBeans = newNamedBeans
+
+            // notify all upgrade()
+            namedBeans.findAll { k, v ->
+                !upgradedBeans.containsKey(k)
+            }.each { k, v ->
+                upgradeNotify(v)
+            }
+
+        } catch (Exception e) {
+            log.error("upgrade failed. ${e.message}", e)
         }
 
     }
@@ -222,7 +224,7 @@ class Summer {
         return res
     }
 
-    private SummerException missingDepesException(Multimap<String, DependencyBean> missing){
+    private SummerException missingDepesException(Multimap<String, DependencyBean> missing) {
         def errorMessage = missing.values().collect {
             "inject ${it.object.class.name} failed: no bean named ${it.name}."
         }.join("\n")
@@ -262,7 +264,7 @@ class Summer {
         if (aspect) {
 
             if (object in GroovyObject) {
-                def handler = classLoader.findClass(aspect.handler())
+                def handler = classLoader.loadClass(aspect.handler())
                 AopHelper.install((GroovyObject) object, (IAspectHandler) handler.newInstance())
             } else {
                 log.warn("not support java class aop yet")
@@ -333,7 +335,6 @@ class Summer {
             } else {
                 name = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, object.class.simpleName)
             }
-            watchClasses.add(object.class.name)
             return this.bean(name, object, isUpgrade)
         }
         return null
@@ -345,22 +346,19 @@ class Summer {
     }
 
     protected NamedBean beanFromClassName(String className, boolean isUpgrade = false) {
-        return beanFromClass(classLoader.findClass(className), isUpgrade)
+        return beanFromClass(classLoader.loadClass(className), isUpgrade)
     }
 
-    protected Map<String, Object> beansFromClasses(List<Class> classes, boolean isUpgrade = false) {
+    protected Map<String, Object> beansFromClasses(Map<String, Class> classes, boolean isUpgrade = false) {
         return classes.findResults {
-            beanFromClass(it, isUpgrade)
+            beanFromClass(it.value, isUpgrade)
         }.collectEntries {
             [(it.name): it.object]
         }
     }
 
     protected Map<String, Object> beansFromPackage(PackageScan packageScan, boolean isUpgrade = false) {
-        if (!isUpgrade) {
-            watchPackages.add(packageScan)
-        }
-        return beansFromClasses(classLoader.scanPackage(packageScan).toList(), isUpgrade)
+        return beansFromClasses(classLoader.scanPackage(packageScan), isUpgrade)
     }
 
 ////////////////////////////////////
@@ -372,7 +370,7 @@ class Summer {
     }
 
     public <T> Map<String, T> getBeansByType(String clazzName) {
-        return getBeansByType(classLoader.findClass(clazzName))
+        return getBeansByType(classLoader.loadClass(clazzName))
     }
 
     public <T> Map<String, T> getBeansByType(Class<T> clazz) {

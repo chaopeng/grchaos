@@ -1,10 +1,6 @@
 package me.chaopeng.grchaos.summer.aop.annotations
 
-import java.lang.annotation.Documented
-import java.lang.annotation.ElementType
-import java.lang.annotation.Retention
-import java.lang.annotation.RetentionPolicy
-import java.lang.annotation.Target
+import java.lang.annotation.*
 
 /**
  * me.chaopeng.grchaos.summer.aop.annotations.Aspect
@@ -17,6 +13,7 @@ import java.lang.annotation.Target
 @Documented
 @interface Aspect {
     String handler()
+
     Type type() default Type.PUBLIC
 
     /**

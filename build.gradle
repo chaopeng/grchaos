@@ -19,11 +19,11 @@ apply plugin: 'groovy'
 apply plugin: 'idea'
 apply plugin: 'signing'
 
-ext.v='1.0.0-alpha'
+ext.v = '1.0.0-alpha'
 
 subprojects {
 
-	apply plugin: 'groovy'
+    apply plugin: 'groovy'
     apply plugin: 'com.github.ben-manes.versions'
     apply from: rootDir.path + '/libraries.gradle'
     apply from: rootDir.path + '/publish.gradle'
@@ -34,7 +34,7 @@ subprojects {
 
     ext.isProject = new File(projectDir.path + '/build.gradle').exists()
 
-	group='me.chaopeng.grchaos'
+    group = 'me.chaopeng.grchaos'
     project.version = rootProject.v
 
     repositories {

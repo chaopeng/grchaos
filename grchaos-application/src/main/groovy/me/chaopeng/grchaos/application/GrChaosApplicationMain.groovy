@@ -41,7 +41,7 @@ class GrChaosApplicationMain {
         println "----------------------------------------"
 
         // not developmentMode, start automatically
-        if (!application.configure.developmentMode){
+        if (!application.configure.developmentMode) {
             application.start()
         }
 

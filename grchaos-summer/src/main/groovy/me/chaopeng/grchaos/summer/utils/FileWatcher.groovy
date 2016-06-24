@@ -21,10 +21,10 @@ class FileWatcher {
     private final WatchService watchService
     private final List<DirInfo> dirs = []
 
-    FileWatcher(String filepaths) {
+    FileWatcher(List<String> filepaths) {
         watchService = FileSystems.getDefault().newWatchService()
 
-        filepaths.split(",").each { filepath ->
+        filepaths.each { filepath ->
             Path path = Paths.get(filepath)
 
             path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE)
@@ -72,12 +72,12 @@ class FileWatcher {
     /**
      * @param paths will watch
      * @param intervalSecond
-     * @param closure{Changes -> ...}
+     * @param closure {Changes -> ...}
      */
-    static FileWatcher watchDir(String paths, int intervalSecond, Closure closure) throws IOException {
+    static FileWatcher watchDir(List<String> paths, int intervalSecond, Closure closure) throws IOException {
         FileWatcher fileWatcher = new FileWatcher(paths)
 
-        Observable.interval(intervalSecond, intervalSecond, TimeUnit.SECONDS).observeOn(Schedulers.newThread()).subscribe{
+        Observable.interval(intervalSecond, intervalSecond, TimeUnit.SECONDS).observeOn(Schedulers.newThread()).subscribe {
 
             // if dir has any changes
             if (fileWatcher.isChange()) {

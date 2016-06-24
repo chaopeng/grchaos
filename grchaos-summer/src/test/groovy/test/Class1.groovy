@@ -24,17 +24,17 @@ class Class1 implements SummerAware {
         private def srcClass1
 
         @AspectMe
-        private def a(){
+        private def a() {
             return 1
         }
 
         @AspectMe
-        private def b(int i){
+        private def b(int i) {
             return i
         }
 
         @AspectMe
-        private def c(def i){
+        private def c(def i) {
             return i
         }
 

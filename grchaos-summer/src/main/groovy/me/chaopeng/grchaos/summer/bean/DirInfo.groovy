@@ -25,15 +25,15 @@ class DirInfo {
         }
     }
 
-    boolean isModified(){
-        if (dir.lastModified() != lastModified){
+    boolean isModified() {
+        if (dir.lastModified() != lastModified) {
             lastModified = dir.lastModified()
             return true
         }
         return false
     }
 
-    void changes(Changes<File> changes){
+    void changes(Changes<File> changes) {
         Map<String, String> newMd5s = new HashMap<>()
 
         DirUtils.recursive(dir.path, FileType.FILES).each { file ->

@@ -14,7 +14,7 @@ import spock.lang.Specification
  */
 class SummerClassLoaderTest extends Specification {
 
-    def scl
+    SummerClassLoader scl
 
     def setup() {
         TestHelper.reloadableClassesSetup()
@@ -28,8 +28,8 @@ class SummerClassLoaderTest extends Specification {
     def "init & find"() {
 
         expect:
-        scl.findClass(name).name == name
-        scl.findClass(name) == scl.findClass(name)
+        scl.loadClass(name).name == name
+        scl.loadClass(name) == scl.loadClass(name)
 
         where:
         name                             | _
@@ -45,13 +45,13 @@ class SummerClassLoaderTest extends Specification {
 
     def "Class4 hello"() {
         expect:
-        scl.findClass("test.SrcClass2").newInstance().hello() == "hello"
+        scl.loadClass("test.SrcClass2").newInstance().hello() == "hello"
     }
 
     def "reload file change"() {
         sleep(1000)
 
-        def old = scl.findClass("test.SrcClass2").newInstance()
+        def old = scl.loadClass("test.SrcClass2").newInstance()
         def class4 = '''\
 package test
 
@@ -67,7 +67,7 @@ class SrcClass2 {
         scl.reload()
 
         expect:
-        scl.findClass("test.SrcClass2").newInstance().hello() == "hello2"
+        scl.loadClass("test.SrcClass2").newInstance().hello() == "hello2"
         old.hello() == "hello"
 
     }
@@ -89,7 +89,7 @@ class SrcClass3 {
         scl.reload()
 
         expect:
-        scl.findClass("test.SrcClass3").newInstance().hello() == "hello2"
+        scl.loadClass("test.SrcClass3").newInstance().hello() == "hello2"
     }
 
     def "reload delete file"() {
@@ -99,21 +99,18 @@ class SrcClass3 {
         DirUtils.rm("tmp/SrcClass2.groovy")
         scl.reload()
 
-        scl.class.getDeclaredField("fileToClasses").accessible = true
-
         when:
-        scl.findClass("test.SrcClass2")
+        scl.loadClass("test.SrcClass2")
 
         then:
         thrown(ClassNotFoundException)
-        !scl.fileToClasses.containsKey(srcClass2.absolutePath)
     }
 
     def "package scan"() {
 
         expect:
-        scl.scanPackage(new PackageScan(packageName:"test", recursive:recursive, excludeInner:excludeInner))
-                .collect { it.simpleName }.sort() == classes.sort()
+        scl.scanPackage(new PackageScan(packageName: "test", recursive: recursive, excludeInner: excludeInner))
+                .collect { it.value.simpleName }.sort() == classes.sort()
 
         where:
         recursive | excludeInner | classes

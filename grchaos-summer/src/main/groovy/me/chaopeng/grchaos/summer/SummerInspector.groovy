@@ -35,7 +35,7 @@ class SummerInspector {
      * @return missing deps
      */
     static List<DependencyBean> testDeps(Summer summer, String className) {
-        return testDeps(summer, summer.classLoader.findClass(className))
+        return testDeps(summer, summer.classLoader.loadClass(className))
     }
 
     /**

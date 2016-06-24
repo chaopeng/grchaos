@@ -2,11 +2,7 @@ package me.chaopeng.grchaos.summer.utils
 
 import com.google.common.io.Files
 import groovy.io.FileType
-import org.omg.CORBA.Any
 import spock.lang.Specification
-
-import java.nio.file.StandardWatchEventKinds
-import java.nio.file.WatchEvent
 
 /**
  * me.chaopeng.grchaos.summer.utils.DirUtilsTest
@@ -16,7 +12,7 @@ import java.nio.file.WatchEvent
  */
 class DirUtilsTest extends Specification {
 
-    def setup(){
+    def setup() {
         DirUtils.mkdir "tmp"
         DirUtils.mkdir "tmp/dir1"
         DirUtils.mkdir "tmp/dir2"
@@ -31,7 +27,7 @@ class DirUtilsTest extends Specification {
         Files.touch(dir1txt3)
     }
 
-    def cleanup(){
+    def cleanup() {
         def tmp = new File("tmp")
         tmp.deleteDir()
     }
@@ -39,28 +35,28 @@ class DirUtilsTest extends Specification {
 
     def "ls"() {
         expect:
-        DirUtils.ls(path, type, regex).collect {it.name}.sort() == files.sort()
+        DirUtils.ls(path, type, regex).collect { it.name }.sort() == files.sort()
 
         where:
-        path       | type                  | regex  | files
-        "tmp"      | FileType.ANY          | ~/.*/  | ["1.txt", "2.txt", "dir1", "dir2"]
-        "tmp"      | FileType.ANY          | ~/1/   | ["1.txt", "dir1"]
-        "tmp"      | FileType.DIRECTORIES  | ~/.*/  | ["dir1", "dir2"]
-        "tmp"      | FileType.FILES        | ~/.*/  | ["1.txt", "2.txt"]
-        "tmp/dir2" | FileType.ANY          | ~/.*/  | []
+        path       | type                 | regex | files
+        "tmp"      | FileType.ANY         | ~/.*/ | ["1.txt", "2.txt", "dir1", "dir2"]
+        "tmp"      | FileType.ANY         | ~/1/  | ["1.txt", "dir1"]
+        "tmp"      | FileType.DIRECTORIES | ~/.*/ | ["dir1", "dir2"]
+        "tmp"      | FileType.FILES       | ~/.*/ | ["1.txt", "2.txt"]
+        "tmp/dir2" | FileType.ANY         | ~/.*/ | []
     }
 
     def "recursive"() {
         expect:
-        DirUtils.recursive(path, type, regex).collect {it.name}.sort() == files.sort()
+        DirUtils.recursive(path, type, regex).collect { it.name }.sort() == files.sort()
 
         where:
-        path  | type                  | regex  | files
-        "tmp" | FileType.ANY          | ~/.*/  | ["1.txt", "2.txt", "3.txt", "dir1", "dir2", "dir3"]
-        "tmp" | FileType.ANY          | ~/1/   | ["1.txt", "dir1"]
-        "tmp" | FileType.DIRECTORIES  | ~/.*/  | ["dir1", "dir2", "dir3"]
-        "tmp" | FileType.FILES        | ~/.*/  | ["1.txt", "2.txt", "3.txt"]
-        "tmp" | FileType.FILES        | ~/\.txt/  | ["1.txt", "2.txt", "3.txt"]
+        path  | type                 | regex    | files
+        "tmp" | FileType.ANY         | ~/.*/    | ["1.txt", "2.txt", "3.txt", "dir1", "dir2", "dir3"]
+        "tmp" | FileType.ANY         | ~/1/     | ["1.txt", "dir1"]
+        "tmp" | FileType.DIRECTORIES | ~/.*/    | ["dir1", "dir2", "dir3"]
+        "tmp" | FileType.FILES       | ~/.*/    | ["1.txt", "2.txt", "3.txt"]
+        "tmp" | FileType.FILES       | ~/\.txt/ | ["1.txt", "2.txt", "3.txt"]
     }
 
     def "cp file"() {
@@ -68,7 +64,7 @@ class DirUtilsTest extends Specification {
         DirUtils.cp("tmp/1.txt", "tmp/dir2")
 
         then:
-        DirUtils.ls("tmp/dir2", FileType.ANY).collect {it.name} == ["1.txt"]
+        DirUtils.ls("tmp/dir2", FileType.ANY).collect { it.name } == ["1.txt"]
     }
 
     def "cp dir"() {
@@ -76,7 +72,7 @@ class DirUtilsTest extends Specification {
         DirUtils.cp("tmp/dir1", "tmp/dir2")
 
         then:
-        DirUtils.ls("tmp/dir2", FileType.ANY).collect {it.name}.sort() == ["3.txt", "dir3"].sort()
+        DirUtils.ls("tmp/dir2", FileType.ANY).collect { it.name }.sort() == ["3.txt", "dir3"].sort()
     }
 
     def "rm file"() {
@@ -84,7 +80,7 @@ class DirUtilsTest extends Specification {
         DirUtils.rm("tmp/1.txt")
 
         then:
-        DirUtils.ls("tmp", FileType.FILES).collect {it.name} == ["2.txt"]
+        DirUtils.ls("tmp", FileType.FILES).collect { it.name } == ["2.txt"]
     }
 
     def "rm dir"() {
@@ -92,7 +88,7 @@ class DirUtilsTest extends Specification {
         DirUtils.rm("tmp/dir1")
 
         then:
-        DirUtils.ls("tmp", FileType.DIRECTORIES).collect {it.name} == ["dir2"]
+        DirUtils.ls("tmp", FileType.DIRECTORIES).collect { it.name } == ["dir2"]
     }
 
     def "mkdir"() {
@@ -100,6 +96,6 @@ class DirUtilsTest extends Specification {
         DirUtils.mkdir("tmp/dir4")
 
         then:
-        DirUtils.ls("tmp", FileType.DIRECTORIES).collect {it.name}.contains("dir4")
+        DirUtils.ls("tmp", FileType.DIRECTORIES).collect { it.name }.contains("dir4")
     }
 }

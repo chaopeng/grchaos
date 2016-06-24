@@ -5,11 +5,7 @@ import groovyjarjarasm.asm.ClassVisitor
 import groovyjarjarasm.asm.ClassWriter
 import me.chaopeng.grchaos.summer.exceptions.SummerException
 import org.codehaus.groovy.ast.ClassNode
-import org.codehaus.groovy.control.BytecodeProcessor
-import org.codehaus.groovy.control.CompilationFailedException
-import org.codehaus.groovy.control.CompilationUnit
-import org.codehaus.groovy.control.CompilerConfiguration
-import org.codehaus.groovy.control.Phases
+import org.codehaus.groovy.control.*
 
 /**
  * Helper class for compiling Groovy files into classes. This class takes as it's input a collection
@@ -35,7 +31,7 @@ class GroovyCompileHelper {
      * @throws SummerException
      */
     @SuppressWarnings("unchecked")
-    public Set<Class> compile0() throws SummerException {
+    public Map<String, Class> compile0() throws SummerException {
 
         def groovyClassLoader = new GroovyClassLoader()
 
@@ -71,27 +67,27 @@ class GroovyCompileHelper {
 
         private final GroovyClassLoader cl
         private final CompilationUnit unit
-        private final Set<Class> loadedClasses
+        private final Map<String, Class> loadedClasses
 
         ClassCollector(GroovyClassLoader gcl, CompilationUnit unit) {
             this.cl = new GroovyClassLoader.InnerLoader(gcl)
             this.unit = unit
-            this.loadedClasses = new HashSet<>()
+            this.loadedClasses = new HashMap<>()
         }
 
         @Override
         void call(ClassVisitor classVisitor, ClassNode classNode) throws CompilationFailedException {
             BytecodeProcessor bytecodePostprocessor = unit.getConfiguration().getBytecodePostprocessor()
-            byte[] fcode = (classVisitor as ClassWriter).toByteArray()
+            byte[] code = (classVisitor as ClassWriter).toByteArray()
             if (bytecodePostprocessor != null) {
-                fcode = bytecodePostprocessor.processBytecode(classNode.getName(), fcode)
+                code = bytecodePostprocessor.processBytecode(classNode.getName(), code)
             }
-            Class theClass = cl.defineClass(classNode.name, fcode)
-            this.loadedClasses.add(theClass)
+            Class clazz = cl.defineClass(classNode.name, code)
+            this.loadedClasses.put(classNode.name, clazz)
         }
     }
 
-    static Set<Class> compile(List<String> paths) {
+    static Map<String, Class> compile(List<String> paths) {
 
         def helper = new GroovyCompileHelper()
 

@@ -13,20 +13,22 @@ class GroovyCompileHelperTest extends Specification {
 
     def gcl = new GroovyClassLoader()
 
-    def setup(){
+    def setup() {
         TestClassWithDepend.setup()
     }
 
-    def cleanup(){
+    def cleanup() {
         TestClassWithDepend.cleanup()
     }
 
-    def "compile"(){
+    def "compile"() {
         def classes = GroovyCompileHelper.compile(["tmp"])
 
         expect:
         classes.size() == 4
-        classes.find{it.name == "test.SrcClass1"}.newInstance().srcClass2.class == classes.find{it.name == "test.SrcClass2"}
+        classes.values().find { it.name == "test.SrcClass1" }.newInstance().srcClass2.class == classes.values().find {
+            it.name == "test.SrcClass2"
+        }
     }
 
 }

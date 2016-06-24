@@ -54,7 +54,7 @@ class SummerInspectorTest extends Specification {
         "class1Inner" | 2
     }
 
-    static class DepsMissingClass{
+    static class DepsMissingClass {
         @Inject
         def missing
     }
@@ -64,7 +64,7 @@ class SummerInspectorTest extends Specification {
 
         expect:
         missing.size() == 1
-        missing.any{
+        missing.any {
             it.name == "missing" && it.object.class == DepsMissingClass.class
         }
     }
@@ -90,7 +90,7 @@ class SummerInspectorTest extends Specification {
 
         expect:
         missing.get("m").size() == 1
-        missing.get("m").any{
+        missing.get("m").any {
             it.name == "missing" && it.object.class == DepsMissingClass.class
         }
     }

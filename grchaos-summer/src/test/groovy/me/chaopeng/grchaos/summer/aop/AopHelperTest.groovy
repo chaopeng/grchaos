@@ -11,58 +11,58 @@ import spock.lang.Specification
  */
 class AopHelperTest extends Specification {
 
-    class UselessAspectHandler implements IAspectHandler{
+    class UselessAspectHandler implements IAspectHandler {
 
         String log = ""
 
         @Override
         void begin(String name, Object[] args) {
-            log+="begin,"
+            log += "begin,"
         }
 
         @Override
         void before(String name, Object[] args) {
-            log+="before,"
+            log += "before,"
         }
 
         @Override
         boolean filter(String name, Object[] args) {
-            log+="filter,"
+            log += "filter,"
             return true
         }
 
         @Override
         void end(String name, Object[] args) {
-            log+="end,"
+            log += "end,"
         }
 
         @Override
         void error(String name, Object[] args, Throwable error) {
-            log+="${error.getMessage()},"
+            log += "${error.getMessage()},"
         }
 
         @Override
         void after(String name, Object[] args) {
-            log+="after"
+            log += "after"
         }
     }
 
     @Aspect(handler = "")
     class UselessClass {
 
-        private privateMethod(){
+        private privateMethod() {
 
         }
 
-        def nonVoidMethod(){
+        def nonVoidMethod() {
             return "nonVoidMethod return"
         }
 
-        def voidMethod(){
+        def voidMethod() {
 
         }
 
-        def exceptionMethod(){
+        def exceptionMethod() {
             throw new Exception("this is an exception")
         }
     }
