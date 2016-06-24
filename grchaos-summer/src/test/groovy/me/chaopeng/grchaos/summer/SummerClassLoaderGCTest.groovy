@@ -19,7 +19,6 @@ class SummerClassLoaderGCTest {
 
             sleep(1)
 
-            GroovyCompileHelper.unloadClasses(classes)
         }
     }
 }

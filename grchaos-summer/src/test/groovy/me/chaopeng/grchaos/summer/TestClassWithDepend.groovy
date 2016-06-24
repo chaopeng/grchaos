@@ -24,6 +24,9 @@ import me.chaopeng.grchaos.summer.ioc.annotations.Bean
 @Bean
 class SrcClass1 {
 
+    SrcClass2 srcClass2 = new SrcClass2()
+
+
     def hello(){
         "hello"
     }
@@ -49,7 +52,6 @@ import me.chaopeng.grchaos.summer.ioc.annotations.Bean
 class SrcClass2 {
 
     Class1 class1
-    SrcClass1 srcClass1
 
     def hello(){
         "hello"

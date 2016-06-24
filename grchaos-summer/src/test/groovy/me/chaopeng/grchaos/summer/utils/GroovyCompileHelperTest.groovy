@@ -26,6 +26,7 @@ class GroovyCompileHelperTest extends Specification {
 
         expect:
         classes.size() == 4
+        classes.find{it.name == "test.SrcClass1"}.newInstance().srcClass2.class == classes.find{it.name == "test.SrcClass2"}
     }
 
 }
