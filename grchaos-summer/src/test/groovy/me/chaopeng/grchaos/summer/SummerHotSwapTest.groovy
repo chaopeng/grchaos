@@ -32,6 +32,7 @@ class SummerHotSwapTest extends Specification {
                 return fromPackage(new PackageScan(packageName: "test"))
             }
         })
+        summer.preStart()
     }
 
     def cleanup() {
@@ -91,7 +92,6 @@ class SrcClass3 {
         '''
         Files.write(srcClass1, new File("tmp/SrcClass1.groovy"), Charsets.UTF_8)
         Files.write(srcClass3, new File("tmp/SrcClass3.groovy"), Charsets.UTF_8)
-        DirUtils.rm("tmp/SrcClass2.groovy")
 
         TestInjectMe testInjectMe = new TestInjectMe()
         summer.injectMe(testInjectMe)
@@ -112,8 +112,8 @@ class SrcClass3 {
 
         testInjectMeSrcClass1.is(srcClass1BeforeReload)
 
-        // not updated bean
-        class1InnerBeforeReload.is(class1InnerAfterReload)
+        // not updated class but bean updated
+        class1InnerBeforeReload != class1InnerAfterReload
 
         // new inject
         srcClass1BeforeReload.hasProperty("class1") == null
@@ -131,7 +131,7 @@ class SrcClass3 {
         // brand new bean class
         def srcClass3Bean = summer.getBean("srcClass3")
         srcClass3Bean != null // new bean
-        srcClass3Bean.srcClass2 != null // delete will be ignore
+        srcClass3Bean.srcClass2 != null
 
         // anonymousBean inject update
         testInjectMe.srcClass1.is(srcClass1AfterReload)
