@@ -1,6 +1,9 @@
 package me.chaopeng.grchaos.summer
 
+import com.google.common.base.CaseFormat
+import me.chaopeng.grchaos.summer.bean.NamedBean
 import me.chaopeng.grchaos.summer.bean.PackageScan
+import me.chaopeng.grchaos.summer.ioc.annotations.Bean
 
 /**
  * me.chaopeng.grchaos.summer.AbstractSummerModule
@@ -13,32 +16,48 @@ abstract class AbstractSummerModule {
 
     protected Summer summer
 
-    protected abstract void configure()
+    protected abstract List<NamedBean> configure()
 
-    protected void mutableBeansConfigure(){}
+    protected List<NamedBean> mutableBeansConfigure() {
+        return []
+    }
 
     protected void start() {}
 
     protected void stop() {}
 
-    final void bean(String name, Object obj) {
-        summer.bean(name, obj)
+    final NamedBean bean(String name, Object obj) {
+        return NamedBean.builder().name(name).object(obj).build()
     }
 
-    final void bean(Object obj) {
-        summer.bean(obj)
+    final NamedBean bean(Object obj) {
+        Bean bean = obj.class.getAnnotation(Bean.class)
+        if (bean != null) {
+            String name
+            if (!bean.value().isEmpty()) {
+                name = bean.value()
+            } else {
+                name = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, obj.class.simpleName)
+            }
+            return NamedBean.builder().name(name).object(obj).build()
+        }
+        return null
     }
 
-    final void fromClass(String className) {
-        summer.beanFromClassName(className)
+    final NamedBean fromClass(String className) {
+        return fromClass(summer.classLoader.loadClass(className))
     }
 
-    final void fromClass(Class clazz) {
-        summer.beanFromClass(clazz)
+    final NamedBean fromClass(Class clazz) {
+        def o = clazz.newInstance()
+        return bean(o)
     }
 
-    final void fromPackage(PackageScan packageScan) {
-        summer.beansFromPackage(packageScan)
+    final List<NamedBean> fromPackage(PackageScan packageScan) {
+        return summer.classLoader.scanPackage(packageScan).values()
+                .findResults { fromClass(it) }
+                .collect()
+
     }
 
 }

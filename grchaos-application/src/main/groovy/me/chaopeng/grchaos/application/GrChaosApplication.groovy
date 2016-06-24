@@ -35,7 +35,7 @@ class GrChaosApplication {
 
         Summer s = new Summer(configure.srcPath, configure.autoReload)
 
-        def clazz = s.getClassLoader().findClass(configure.summerModule)
+        def clazz = s.getClassLoader().loadClass(configure.summerModule)
 
         def moduleIns = clazz.newInstance()
 
@@ -52,8 +52,13 @@ class GrChaosApplication {
 
     static GrChaosApplication fromString(String s) {
         def configure = new ConfigSlurper().parse(s)
+        GrChaosApplicationConfigure grChaosApplicationConfigure = new GrChaosApplicationConfigure()
+        grChaosApplicationConfigure.srcPath = configure.srcPath
+        grChaosApplicationConfigure.autoReload = configure.autoReload
+        grChaosApplicationConfigure.summerModule = configure.summerModule
+        grChaosApplicationConfigure.developmentMode = configure.developmentMode
 
-        return fromConfigure(configure as GrChaosApplicationConfigure)
+        return fromConfigure(grChaosApplicationConfigure)
     }
 
     static GrChaosApplication fromFile(String filePath) {

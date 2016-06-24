@@ -3,6 +3,7 @@ package me.chaopeng.grchaos.summer
 import com.google.common.base.Charsets
 import com.google.common.io.Files
 import me.chaopeng.grchaos.summer.bean.PackageScan
+import me.chaopeng.grchaos.summer.exceptions.SummerException
 import me.chaopeng.grchaos.summer.utils.DirUtils
 import spock.lang.Specification
 
@@ -17,12 +18,12 @@ class SummerClassLoaderTest extends Specification {
     SummerClassLoader scl
 
     def setup() {
-        TestHelper.reloadableClassesSetup()
+        TestHelper.setup()
         scl = SummerClassLoader.create("tmp")
     }
 
     def cleanup() {
-        TestHelper.reloadableClassesCleanup()
+        TestHelper.cleanup()
     }
 
     def "init & find"() {
@@ -95,12 +96,26 @@ class SrcClass3 {
     def "reload delete file"() {
         sleep(1000)
 
-        File srcClass2 = new File("tmp/SrcClass2.groovy")
-        DirUtils.rm("tmp/SrcClass2.groovy")
+        def srcClass2 = '''\
+package test
+
+import me.chaopeng.grchaos.summer.ioc.annotations.Bean
+
+@Bean
+class SrcClass2 {
+
+    def hello(){
+        "hello"
+    }
+}
+'''
+        Files.write(srcClass2, new File("tmp/SrcClass2.groovy"), Charsets.UTF_8)
+
+        DirUtils.rm("tmp/SrcClass1.groovy")
         scl.reload()
 
         when:
-        scl.loadClass("test.SrcClass2")
+        scl.loadClass("test.SrcClass1")
 
         then:
         thrown(ClassNotFoundException)

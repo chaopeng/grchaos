@@ -2,6 +2,7 @@ package me.chaopeng.grchaos.summer
 
 import com.google.common.base.Charsets
 import com.google.common.io.Files
+import me.chaopeng.grchaos.summer.bean.NamedBean
 import me.chaopeng.grchaos.summer.bean.PackageScan
 import me.chaopeng.grchaos.summer.ioc.annotations.Inject
 import me.chaopeng.grchaos.summer.utils.DirUtils
@@ -18,18 +19,23 @@ class SummerHotSwapTest extends Specification {
     Summer summer
 
     def setup() {
-        TestHelper.reloadableClassesSetup()
+        TestHelper.setup()
         summer = new Summer("tmp")
         summer.loadModule(new AbstractSummerModule() {
             @Override
-            protected void configure() {
-                fromPackage(new PackageScan(packageName: "test"))
+            protected List<NamedBean> configure() {
+                return []
+            }
+
+            @Override
+            protected List<NamedBean> mutableBeansConfigure() {
+                return fromPackage(new PackageScan(packageName: "test"))
             }
         })
     }
 
     def cleanup() {
-        TestHelper.reloadableClassesCleanup()
+        TestHelper.cleanup()
     }
 
     static class TestInjectMe {

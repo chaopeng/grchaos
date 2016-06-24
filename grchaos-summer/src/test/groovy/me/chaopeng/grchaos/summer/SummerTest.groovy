@@ -1,5 +1,6 @@
 package me.chaopeng.grchaos.summer
 
+import me.chaopeng.grchaos.summer.bean.NamedBean
 import me.chaopeng.grchaos.summer.bean.PackageScan
 import me.chaopeng.grchaos.summer.bean.SummerAware
 import me.chaopeng.grchaos.summer.exceptions.SummerException
@@ -19,13 +20,13 @@ class SummerTest extends Specification {
     Summer summer
 
     def setup() {
-        TestHelper.reloadableClassesSetup()
+        TestHelper.setup()
         summer = new Summer("tmp")
 
     }
 
     def cleanup() {
-        TestHelper.reloadableClassesCleanup()
+        TestHelper.cleanup()
     }
 
 
@@ -35,11 +36,13 @@ class SummerTest extends Specification {
         Summer summer = new Summer("tmp")
         summer.loadModule(new AbstractSummerModule() {
             @Override
-            protected void configure() {
-                bean(new Class1())
-                bean("class3", new Class3())
-                fromClass(Class1.Class1Inner.class)
-                fromClass(Class2.class.name)
+            protected List<NamedBean> configure() {
+                return [
+                        bean(new Class1())
+                        , bean("class3", new Class3())
+                        , fromClass(Class1.Class1Inner.class)
+                        , fromClass(Class2.class.name)
+                ]
             }
         })
 
@@ -61,8 +64,8 @@ class SummerTest extends Specification {
         setup:
         summer.loadModule(new AbstractSummerModule() {
             @Override
-            protected void configure() {
-                fromPackage(new PackageScan(packageName: "test"))
+            protected List<NamedBean> configure() {
+                return fromPackage(new PackageScan(packageName: "test"))
             }
         })
 
@@ -90,8 +93,8 @@ class SummerTest extends Specification {
         setup:
         summer.loadModule(new AbstractSummerModule() {
             @Override
-            protected void configure() {
-                fromPackage(new PackageScan(packageName: "test", recursive: false))
+            protected List<NamedBean> configure() {
+                return fromPackage(new PackageScan(packageName: "test", recursive: false))
             }
         })
         summer.preStart()
@@ -112,8 +115,8 @@ class SummerTest extends Specification {
         setup:
         summer.loadModule(new AbstractSummerModule() {
             @Override
-            protected void configure() {
-                fromPackage(new PackageScan(packageName: "test", recursive: false))
+            protected List<NamedBean> configure() {
+                return fromPackage(new PackageScan(packageName: "test", recursive: false))
             }
         })
         summer.preStart()
@@ -136,8 +139,8 @@ class SummerTest extends Specification {
         setup:
         summer.loadModule(new AbstractSummerModule() {
             @Override
-            protected void configure() {
-                fromPackage(new PackageScan(packageName: "test", recursive: true))
+            protected List<NamedBean> configure() {
+                return fromPackage(new PackageScan(packageName: "test", recursive: true))
             }
         })
         summer.preStart()
@@ -157,9 +160,11 @@ class SummerTest extends Specification {
         when:
         summer.loadModule(new AbstractSummerModule() {
             @Override
-            protected void configure() {
-                fromPackage(new PackageScan(packageName: "test", recursive: true))
-                bean("class1", new Object())
+            protected List<NamedBean> configure() {
+                List<NamedBean> res = []
+                res.addAll(fromPackage(new PackageScan(packageName: "test", recursive: true)))
+                res.add(bean("class1", new Object()))
+                return res
             }
         })
 

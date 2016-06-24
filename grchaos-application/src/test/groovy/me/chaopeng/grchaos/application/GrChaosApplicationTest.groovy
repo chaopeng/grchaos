@@ -5,6 +5,7 @@ import com.google.common.io.Files
 import me.chaopeng.grchaos.summer.AbstractSummerModule
 import me.chaopeng.grchaos.summer.SummerInspector
 import me.chaopeng.grchaos.summer.TestHelper
+import me.chaopeng.grchaos.summer.bean.NamedBean
 import me.chaopeng.grchaos.summer.bean.PackageScan
 import spock.lang.Specification
 
@@ -17,11 +18,11 @@ import spock.lang.Specification
 class GrChaosApplicationTest extends Specification {
 
     def setup() {
-        TestHelper.reloadableClassesSetup()
+        TestHelper.setup()
     }
 
     def cleanup() {
-        TestHelper.reloadableClassesCleanup()
+        TestHelper.cleanup()
         new File("application.conf").delete()
     }
 
@@ -41,8 +42,8 @@ developmentMode=false
 
     static class TestSummerModule extends AbstractSummerModule {
         @Override
-        protected void configure() {
-            fromPackage(new PackageScan(packageName: "test"))
+        protected List<NamedBean> configure() {
+            return fromPackage(new PackageScan(packageName: "test"))
         }
     }
 

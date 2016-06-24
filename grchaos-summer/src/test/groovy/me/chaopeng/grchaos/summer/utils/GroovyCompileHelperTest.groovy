@@ -1,6 +1,6 @@
 package me.chaopeng.grchaos.summer.utils
 
-import me.chaopeng.grchaos.summer.TestClassWithDepend
+import me.chaopeng.grchaos.summer.TestHelper
 import spock.lang.Specification
 
 /**
@@ -14,11 +14,11 @@ class GroovyCompileHelperTest extends Specification {
     def gcl = new GroovyClassLoader()
 
     def setup() {
-        TestClassWithDepend.setup()
+        TestHelper.setup()
     }
 
     def cleanup() {
-        TestClassWithDepend.cleanup()
+        TestHelper.cleanup()
     }
 
     def "compile"() {

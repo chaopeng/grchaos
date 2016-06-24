@@ -1,5 +1,6 @@
 package me.chaopeng.grchaos.summer
 
+import me.chaopeng.grchaos.summer.bean.NamedBean
 import me.chaopeng.grchaos.summer.bean.PackageScan
 import me.chaopeng.grchaos.summer.ioc.annotations.Inject
 import spock.lang.Specification
@@ -15,18 +16,18 @@ class SummerInspectorTest extends Specification {
     Summer summer
 
     def setup() {
-        TestHelper.reloadableClassesSetup()
+        TestHelper.setup()
         summer = new Summer("tmp")
         summer.loadModule(new AbstractSummerModule() {
             @Override
-            protected void configure() {
-                fromPackage(new PackageScan(packageName: "test"))
+            protected List<NamedBean> configure() {
+                return fromPackage(new PackageScan(packageName: "test"))
             }
         })
     }
 
     def cleanup() {
-        TestHelper.reloadableClassesCleanup()
+        TestHelper.cleanup()
     }
 
     def "all beans"() {
@@ -80,9 +81,11 @@ class SummerInspectorTest extends Specification {
         summer = new Summer("tmp")
         summer.loadModule(new AbstractSummerModule() {
             @Override
-            protected void configure() {
-                fromPackage(new PackageScan(packageName: "test"))
-                bean("m", new DepsMissingClass())
+            protected List<NamedBean> configure() {
+                List<NamedBean> res = []
+                res.addAll(fromPackage(new PackageScan(packageName: "test")))
+                res.add(bean("m", new DepsMissingClass()))
+                return res
             }
         })
 

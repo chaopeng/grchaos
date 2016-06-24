@@ -37,7 +37,7 @@ class Summer {
     private final SummerClassLoader classLoader
     private AbstractSummerModule module
     protected Map<String, Object> namedBeans = [:]
-    private List<String> immutableBeans
+    private List<NamedBean> immutableBeans
     private List<WeakReference<Object>> anonymousBeans = new LinkedList<>()
     private int stage = 0 // none(0), init-ed(1), prestart-ed(2), start-ed(3)
 
@@ -61,11 +61,14 @@ class Summer {
             module.summer = this
 
             // load immutable beans
-            module.configure()
-            immutableBeans = namedBeans.keySet().collect()
+            def beans = module.configure()
+            addBeans(beans)
+            immutableBeans = beans
 
             // load mutable beans
-            module.mutableBeansConfigure()
+            beans = module.mutableBeansConfigure()
+            addBeans(beans)
+
             stage++
 
             Runtime.getRuntime().addShutdownHook {
@@ -105,54 +108,24 @@ class Summer {
     synchronized void upgrade(ClassChanges changes) {
 
         try {
-            Map<String, Object> newNamedBeans = immutableBeans.collectEntries {[(it):namedBeans.get(it)]}
+            Map<String, Object> newNamedBeans = [:]
+            addBeans(immutableBeans, newNamedBeans)
 
             Map<String, Object> upgradedBeans = [:]
 
             // for updates
-            changes.changes.each {
-                // if it already a bean, replace or remove
-                if (watchClasses.contains(it.name)) {
-                    def b = bean(it.newInstance(), true)
-                    if (b != null) {
-                        // update bean
-                        newNamedBeans.put(b.name, b.object)
-                        upgradedBeans.put(b.name, b.object)
-                    } else {
-                        // class still here just without @Bean, but we ignore it
-                    }
-                }
-
-                // else check is it in watchPackage
-                else if (watchPackages.any { p -> ClassPathScanner.filter(it.name, p) }) {
-                    def b = bean(it.newInstance(), true)
-                    if (b != null) {
-                        // add bean
-                        newNamedBeans.put(b.name, b.object)
-                        upgradedBeans.put(b.name, b.object)
-                    }
-                }
-            }
-
-            // for add
-            changes.adds.each {
-                if (watchPackages.any { p -> ClassPathScanner.filter(it.name, p) }) {
-                    def b = bean(it.newInstance(), true)
-                    if (b != null) {
-                        // add bean
-                        newNamedBeans.put(b.name, b.object)
-                        upgradedBeans.put(b.name, b.object)
-                    }
-                }
-            }
-
-            // for delete
-            changes.deletes.each {
-                // we ignore it
-            }
+            def newBeans = module.mutableBeansConfigure()
+            addBeans(newBeans, newNamedBeans)
+            addBeans(newBeans, upgradedBeans)
 
             // check all dependencies
             def missing = testAllDepes(newNamedBeans, newNamedBeans)
+            if (!missing.isEmpty()) {
+                throw missingDepesException(missing)
+            }
+
+            anonymousBeans.removeAll { it.get() == null }
+            missing = testAllAnonymousBeansDepes(anonymousBeans, newNamedBeans)
             if (!missing.isEmpty()) {
                 throw missingDepesException(missing)
             }
@@ -168,23 +141,32 @@ class Summer {
                 doInject(v, upgradedBeans, true)
             }
 
-            anonymousBeans.removeAll { it.get() == null }
             anonymousBeans.each {
                 doInject(it.get(), upgradedBeans, true)
             }
+
+            // removed bean
+            def immutableBeansName = immutableBeans*.name.toSet()
+            def removedBeans = namedBeans.findAll { k, v -> !immutableBeansName.contains(k)}.values()
 
             // replace
             namedBeans = newNamedBeans
 
             // notify all upgrade()
-            namedBeans.findAll { k, v ->
-                !upgradedBeans.containsKey(k)
-            }.each { k, v ->
+            namedBeans.each { k, v ->
                 upgradeNotify(v)
             }
 
+            // do destroy
+            removedBeans.each {
+                doDestroy(it)
+            }
+
+
         } catch (Exception e) {
             log.error("upgrade failed. ${e.message}", e)
+
+            // TODO revert classloader
         }
 
     }
@@ -217,6 +199,23 @@ class Summer {
                 def name = getBeanNameFromField(field)
                 if (!deps.containsKey(name)) {
                     res.put(k as String, new DependencyBean(object: v, field: field, name: name))
+                }
+            }
+        }
+
+        return res
+    }
+
+    protected Multimap<String, DependencyBean> testAllAnonymousBeansDepes(List<WeakReference<Object>> list = anonymousBeans, Map<String, Object> deps = namedBeans) {
+        Multimap<String, DependencyBean> res = ArrayListMultimap.create()
+        list.each { ref ->
+            def o = ref.get()
+            if (o != null) {
+                ReflectUtils.getFieldsByAnnotation(o, Inject.class).each { field ->
+                    def name = getBeanNameFromField(field)
+                    if (!deps.containsKey(name)) {
+                        res.put(o.class.name as String, new DependencyBean(object: o, field: field, name: name))
+                    }
                 }
             }
         }
@@ -306,59 +305,14 @@ class Summer {
 // bean define
 ////////////////////////////////////
 
-    protected NamedBean bean(String name, Object object, boolean isUpgrade = false) {
-        synchronized (this) {
+    protected synchronized void addBeans(List<NamedBean> beans, Map<String, Object> map = namedBeans) {
 
-            // check upgrade
-            def oldBean = namedBeans.get(name)
-            if (oldBean != null) {
-                if (!isUpgrade) {
-                    throw new SummerException("Bean ${name} is duplicated. ")
-                }
+        for (NamedBean bean : beans) {
+            if (map.containsKey(bean.name)) {
+                throw new SummerException("Bean ${bean.name} is duplicated. ")
             }
-
-            // put into map only if !isUpgrade
-            if (!isUpgrade) {
-                namedBeans.put(name, object)
-            }
-
-            return NamedBean.builder().name(name).object(object).build()
+            map.put(bean.name, bean.object)
         }
-    }
-
-    protected NamedBean bean(Object object, boolean isUpgrade = false) {
-        Bean bean = object.class.getAnnotation(Bean.class)
-        if (bean != null) {
-            String name
-            if (!bean.value().isEmpty()) {
-                name = bean.value()
-            } else {
-                name = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, object.class.simpleName)
-            }
-            return this.bean(name, object, isUpgrade)
-        }
-        return null
-    }
-
-    protected NamedBean beanFromClass(Class clazz, boolean isUpgrade = false) {
-        def o = clazz.newInstance()
-        return bean(o, isUpgrade)
-    }
-
-    protected NamedBean beanFromClassName(String className, boolean isUpgrade = false) {
-        return beanFromClass(classLoader.loadClass(className), isUpgrade)
-    }
-
-    protected Map<String, Object> beansFromClasses(Map<String, Class> classes, boolean isUpgrade = false) {
-        return classes.findResults {
-            beanFromClass(it.value, isUpgrade)
-        }.collectEntries {
-            [(it.name): it.object]
-        }
-    }
-
-    protected Map<String, Object> beansFromPackage(PackageScan packageScan, boolean isUpgrade = false) {
-        return beansFromClasses(classLoader.scanPackage(packageScan), isUpgrade)
     }
 
 ////////////////////////////////////
@@ -367,6 +321,10 @@ class Summer {
 
     Object getBean(String name) {
         return namedBeans.get(name)
+    }
+
+    public <T> T getBean(String name, Class<T> clazz) {
+        return namedBeans.get(name) as T
     }
 
     public <T> Map<String, T> getBeansByType(String clazzName) {

@@ -12,7 +12,7 @@ import me.chaopeng.grchaos.summer.utils.DirUtils
  */
 class TestHelper {
 
-    static def reloadableClassesSetup() {
+    static def setup() {
 
         DirUtils.mkdir("tmp")
 
@@ -23,6 +23,9 @@ import me.chaopeng.grchaos.summer.ioc.annotations.Bean
 
 @Bean
 class SrcClass1 {
+
+    SrcClass2 srcClass2 = new SrcClass2()
+
 
     def hello(){
         "hello"
@@ -48,6 +51,8 @@ import me.chaopeng.grchaos.summer.ioc.annotations.Bean
 @Bean
 class SrcClass2 {
 
+    Class1 class1
+
     def hello(){
         "hello"
     }
@@ -58,9 +63,8 @@ class SrcClass2 {
 
     }
 
-    static def reloadableClassesCleanup() {
-        def tmp = new File("tmp")
-        tmp.deleteDir()
+    static def cleanup() {
+        DirUtils.rm("tmp")
     }
 
 }

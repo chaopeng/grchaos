@@ -2,6 +2,7 @@ package me.chaopeng.grchaos.application
 
 import me.chaopeng.grchaos.summer.AbstractSummerModule
 import me.chaopeng.grchaos.summer.TestHelper
+import me.chaopeng.grchaos.summer.bean.NamedBean
 import me.chaopeng.grchaos.summer.bean.PackageScan
 import me.chaopeng.grchaos.summer.ioc.annotations.Bean
 import me.chaopeng.grchaos.summer.ioc.annotations.Inject
@@ -18,13 +19,13 @@ class GrChaosDevelopmentModeTest extends Specification {
     GrChaosDevelopmentMode grChaosDevelopmentMode
 
     def setup() {
-        TestHelper.reloadableClassesSetup()
+        TestHelper.setup()
         def application = GrChaosApplication.fromConfigure(config)
         grChaosDevelopmentMode = new GrChaosDevelopmentMode(application)
     }
 
     def cleanup() {
-        TestHelper.reloadableClassesCleanup()
+        TestHelper.cleanup()
     }
 
 
@@ -38,9 +39,11 @@ class GrChaosDevelopmentModeTest extends Specification {
     static class TestSummerModule extends AbstractSummerModule {
 
         @Override
-        protected void configure() {
-            fromPackage(new PackageScan(packageName: "test"))
-            bean(new MissingDepsBean())
+        protected List<NamedBean> configure() {
+            List<NamedBean> res = []
+            res.addAll(fromPackage(new PackageScan(packageName: "test")))
+            res.add(bean(new MissingDepsBean()))
+            return res
         }
     }
 

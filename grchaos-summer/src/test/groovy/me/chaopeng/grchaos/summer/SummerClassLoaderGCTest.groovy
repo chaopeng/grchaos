@@ -10,7 +10,7 @@ import me.chaopeng.grchaos.summer.utils.GroovyCompileHelper
  */
 class SummerClassLoaderGCTest {
     static void main(String[] args) {
-        TestClassWithDepend.setup()
+        TestHelper.setup()
 
         while (true) {
             def classes = GroovyCompileHelper.compile(["tmp"])
