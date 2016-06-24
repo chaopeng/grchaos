@@ -1,10 +1,8 @@
 package me.chaopeng.grchaos.summer
 
-import com.google.common.eventbus.EventBus
 import groovy.util.logging.Slf4j
 import me.chaopeng.grchaos.summer.bean.Changes
 import me.chaopeng.grchaos.summer.bean.PackageScan
-import me.chaopeng.grchaos.summer.event.ClassChanges
 import me.chaopeng.grchaos.summer.exceptions.SummerException
 import me.chaopeng.grchaos.summer.utils.ClassPathScanner
 import me.chaopeng.grchaos.summer.utils.FileWatcher

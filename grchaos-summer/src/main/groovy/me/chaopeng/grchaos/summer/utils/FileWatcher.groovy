@@ -72,7 +72,7 @@ class FileWatcher {
     /**
      * @param paths will watch
      * @param intervalSecond
-     * @param closure {Changes -> ...}
+     * @param closure{Changes -> ...}
      */
     static FileWatcher watchDir(List<String> paths, int intervalSecond, Closure closure) throws IOException {
         FileWatcher fileWatcher = new FileWatcher(paths)

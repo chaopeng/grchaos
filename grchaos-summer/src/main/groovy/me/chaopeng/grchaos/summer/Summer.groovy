@@ -1,25 +1,19 @@
 package me.chaopeng.grchaos.summer
 
-import com.google.common.base.CaseFormat
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
-import com.google.common.eventbus.Subscribe
 import groovy.util.logging.Slf4j
 import me.chaopeng.grchaos.summer.aop.AopHelper
 import me.chaopeng.grchaos.summer.aop.IAspectHandler
 import me.chaopeng.grchaos.summer.aop.annotations.Aspect
 import me.chaopeng.grchaos.summer.bean.DependencyBean
 import me.chaopeng.grchaos.summer.bean.NamedBean
-import me.chaopeng.grchaos.summer.bean.PackageScan
 import me.chaopeng.grchaos.summer.bean.SummerAware
-import me.chaopeng.grchaos.summer.event.ClassChanges
 import me.chaopeng.grchaos.summer.exceptions.SummerException
-import me.chaopeng.grchaos.summer.ioc.annotations.Bean
 import me.chaopeng.grchaos.summer.ioc.annotations.Inject
 import me.chaopeng.grchaos.summer.ioc.lifecycle.Destroy
 import me.chaopeng.grchaos.summer.ioc.lifecycle.Initialization
 import me.chaopeng.grchaos.summer.ioc.lifecycle.SummerUpgrade
-import me.chaopeng.grchaos.summer.utils.ClassPathScanner
 import me.chaopeng.grchaos.summer.utils.ReflectUtils
 
 import java.lang.ref.WeakReference
@@ -146,7 +140,7 @@ class Summer {
 
             // removed bean
             def immutableBeansName = immutableBeans*.name.toSet()
-            def removedBeans = namedBeans.findAll { k, v -> !immutableBeansName.contains(k)}.values()
+            def removedBeans = namedBeans.findAll { k, v -> !immutableBeansName.contains(k) }.values()
 
             // replace
             namedBeans = newNamedBeans

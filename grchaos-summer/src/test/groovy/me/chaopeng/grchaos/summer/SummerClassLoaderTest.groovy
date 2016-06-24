@@ -3,7 +3,6 @@ package me.chaopeng.grchaos.summer
 import com.google.common.base.Charsets
 import com.google.common.io.Files
 import me.chaopeng.grchaos.summer.bean.PackageScan
-import me.chaopeng.grchaos.summer.exceptions.SummerException
 import me.chaopeng.grchaos.summer.utils.DirUtils
 import spock.lang.Specification
 

@@ -5,7 +5,6 @@ import com.google.common.io.Files
 import me.chaopeng.grchaos.summer.bean.NamedBean
 import me.chaopeng.grchaos.summer.bean.PackageScan
 import me.chaopeng.grchaos.summer.ioc.annotations.Inject
-import me.chaopeng.grchaos.summer.utils.DirUtils
 import spock.lang.Specification
 
 /**
