@@ -1,0 +1,12 @@
+dependencies {
+    compile project(':${projectName}-lib')
+}
+
+task distZip(type: Zip) {
+    def exportName = project.name + '.zip'
+
+    from 'src/main/groovy'
+    into project.name
+    archiveName = exportName
+    destinationDir = file(exportPath)
+}
