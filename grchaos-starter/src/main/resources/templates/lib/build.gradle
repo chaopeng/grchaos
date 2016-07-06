@@ -1,0 +1,19 @@
+apply plugin: 'application'
+
+mainClassName = "me.chaopeng.grchaos.application.GrChaosApplicationMain"
+
+dependencies {
+    compile(
+            libs.grchaos,
+    )
+}
+
+jar {
+    exclude("**/application.conf")
+}
+
+distZip {
+    archiveName = project.name + ".zip"
+    destinationDir = file(exportPath)
+}
+

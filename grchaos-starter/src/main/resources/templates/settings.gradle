@@ -1,0 +1,1 @@
+include '${projectName}-lib', '${projectName}-app'
