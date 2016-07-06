@@ -8,27 +8,10 @@ package me.chaopeng.grchaos.application
  */
 class GrChaosApplicationConfigure {
 
-    private String srcPath
-    private boolean autoReload
-    private String summerModule
-    private boolean developmentMode
-
-    String getSrcPath() {
-        return srcPath
-    }
-
-    boolean getAutoReload() {
-        return autoReload
-    }
-
-    String getSummerModule() {
-        return summerModule
-    }
-
-    boolean getDevelopmentMode() {
-        return developmentMode
-    }
-
+    String srcPath
+    boolean autoReload
+    String summerModule
+    boolean developmentMode
 
     @Override
     String toString() {

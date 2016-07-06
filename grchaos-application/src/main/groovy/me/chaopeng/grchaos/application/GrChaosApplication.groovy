@@ -52,7 +52,7 @@ class GrChaosApplication {
 
     static GrChaosApplication fromString(String s) {
         def configure = new ConfigSlurper().parse(s)
-        GrChaosApplicationConfigure grChaosApplicationConfigure = new GrChaosApplicationConfigure()
+        def grChaosApplicationConfigure = new GrChaosApplicationConfigure()
         grChaosApplicationConfigure.srcPath = configure.srcPath
         grChaosApplicationConfigure.autoReload = configure.autoReload
         grChaosApplicationConfigure.summerModule = configure.summerModule

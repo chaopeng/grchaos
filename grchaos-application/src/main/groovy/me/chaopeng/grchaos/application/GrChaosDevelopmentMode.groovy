@@ -34,6 +34,7 @@ class GrChaosDevelopmentMode {
 help
 exit
 start - execute application.start()
+reload - reload reloadable beans
 testDeps className - test deps of a class
 testAllDeps - test deps of all classes in SummerModule
 '''
@@ -47,6 +48,11 @@ testAllDeps - test deps of all classes in SummerModule
     String start() {
         application.start()
         return "started"
+    }
+
+    String reload() {
+        application.reload()
+        return "reloaded"
     }
 
     String testDeps(String className) {
