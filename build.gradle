@@ -26,7 +26,6 @@ subprojects {
     apply plugin: 'groovy'
     apply plugin: 'com.github.ben-manes.versions'
     apply from: rootDir.path + '/libraries.gradle'
-    apply from: rootDir.path + '/publish.gradle'
 
     compileJava.options.encoding = 'UTF-8'
     sourceCompatibility = JavaVersion.VERSION_1_8

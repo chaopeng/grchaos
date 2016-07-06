@@ -16,3 +16,5 @@ dependencies {
             libs.logback
     )
 }
+
+apply from: rootDir.path + '/publish.gradle'
