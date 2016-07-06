@@ -1,1 +1,1 @@
-include 'grchaos-summer', 'grchaos-application', 'grchaos-tools'
+include 'grchaos-summer', 'grchaos-application', 'grchaos-starter'

@@ -1,6 +1,0 @@
-dependencies {
-    compile(
-            libs.groovy,
-            libs.guava,
-    )
-}
