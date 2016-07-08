@@ -1,37 +1,26 @@
-# Groovy Chaos Application
+# GrChaos (Groovy Chaos Appliction Framework)
 
-grchaos(Groovy Chaos Application) is an application framework designed to make a groovy application support hotswap. 
+GrChaos is a powerful runtime **howswap** groovy application framework. It is a huge upgrade of [chaopeng/groovy-hotswap-demo](https://github.com/chaopeng/groovy-hotswap-demo).
 
-------------------------
+## How to use it?
 
-TODO
+1. download [GrChaos-Starter](https://github.com/chaopeng/grchaos/raw/master/grchaos-starter/grchaos-starter-1.0.0-rc.zip)
+2. add `bin/grchaos-starter` to $PATH
+3. run `grchaos-starter` in the dir you want to create a GrChaos App
+4. add GrChaos Module Class, [Example](https://github.com/chaopeng/grchaos-sample/blob/master/grchaos-sample-lib/src/main/groovy/me/chaopeng/sample/WebServiceModule.groovy)
+5. add Module Class full classname to `projectName-lib/src/main/resources/application.conf`
+6. run `gradle distZip` to build the project. `application.conf` is not include in the build, you can use program param to define a different configure in production 
 
-------------------------
+Here is a [sample project](https://github.com/chaopeng/grchaos-sample) to show how to build a howswapable webservice. 
 
-## Motivation
+## GrChaos App Project layout
 
-I used GroovyClassLoader to hotswap java classes for java projects. But it has a lot of limitations to make the code hotswapable, only a few class is hotswapable and I need to do a lot of tricky stuff. Here is the [example](https://github.com/chaopeng/groovy-hotswap-demo). Lets see the limitations:
+```
+.
+├── build.gradle # root build script
+├── libs.gradle # libraries
+├── settings.gradle # subproject define
+├── projectName-app # reloadable sources, project depends on projectName-lib
+└── projectName-lib # not reloadable sources
+```
 
-- hotswapable classes stores in GroovyClassLoader, we can only call the methods via reflection.
-- if we can make the native call the interface would not be changable. 
-
-I expect it can: 
-
-- native access methods and properties
-- interface changable
-- base on java or groovy
-- can have strong type system, at lease at coding stage
-
-It looks impossible. 
-
-## How it works
-
-- a simple IoC/AOP framework to replace Spring, and support replace beans in runtime
-- 2 ways to compile: 
-
-  1. compile as normal, it can figure out a lot of problem at compile stage
-  2. load classes by GroovyClassLoader, before we do it traversal the AST of class and replace type with `def`
-
-## How to use
-
-TODO
