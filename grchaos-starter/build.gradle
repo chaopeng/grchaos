@@ -1,3 +1,7 @@
+apply plugin: 'application'
+
+mainClassName = 'me.chaopeng.grchaos.starter.Starter'
+
 dependencies {
     compile(
             libs.groovy,
