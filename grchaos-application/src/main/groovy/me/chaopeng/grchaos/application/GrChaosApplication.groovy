@@ -1,6 +1,7 @@
 package me.chaopeng.grchaos.application
 
 import com.google.common.base.Charsets
+import com.google.common.base.Strings
 import com.google.common.io.Files
 import com.google.common.io.Resources
 import me.chaopeng.grchaos.summer.AbstractSummerModule
@@ -34,6 +35,8 @@ class GrChaosApplication {
     static GrChaosApplication fromConfigure(GrChaosApplicationConfigure configure) {
 
         Summer s = new Summer(configure.srcPath, configure.autoReload)
+
+        assert !Strings.isNullOrEmpty(configure.summerModule):"configure.summerModule not found"
 
         def clazz = s.getClassLoader().loadClass(configure.summerModule)
 

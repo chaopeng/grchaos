@@ -18,7 +18,7 @@ abstract class AbstractSummerModule {
 
     protected abstract List<NamedBean> configure()
 
-    protected List<NamedBean> mutableBeansConfigure() {
+    protected List<NamedBean> reloadableBeansConfigure() {
         return []
     }
 

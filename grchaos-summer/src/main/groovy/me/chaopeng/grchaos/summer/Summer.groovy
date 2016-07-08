@@ -60,7 +60,7 @@ class Summer {
             immutableBeans = beans
 
             // load mutable beans
-            beans = module.mutableBeansConfigure()
+            beans = module.reloadableBeansConfigure()
             addBeans(beans)
 
             stage++
@@ -107,7 +107,7 @@ class Summer {
             Map<String, Object> upgradedBeans = [:]
 
             // for updates
-            def newBeans = module.mutableBeansConfigure()
+            def newBeans = module.reloadableBeansConfigure()
             addBeans(newBeans, newNamedBeans)
             addBeans(newBeans, upgradedBeans)
 

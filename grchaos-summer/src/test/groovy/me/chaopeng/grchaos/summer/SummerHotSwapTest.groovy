@@ -27,7 +27,7 @@ class SummerHotSwapTest extends Specification {
             }
 
             @Override
-            protected List<NamedBean> mutableBeansConfigure() {
+            protected List<NamedBean> reloadableBeansConfigure() {
                 return fromPackage(new PackageScan(packageName: "test"))
             }
         })
