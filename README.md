@@ -9,7 +9,8 @@ GrChaos is a powerful runtime **howswap** groovy application framework. It is a 
 3. run `grchaos-starter` in the dir you want to create a GrChaos App
 4. add GrChaos Module Class, [Example](https://github.com/chaopeng/grchaos-sample/blob/master/grchaos-sample-lib/src/main/groovy/me/chaopeng/sample/WebServiceModule.groovy)
 5. add Module Class full classname to `projectName-lib/src/main/resources/application.conf`
-6. run `gradle distZip` to build the project. `application.conf` is not include in the build, you can use program param to define a different configure in production 
+6. in IDEA add a run configure: mainClass=`me.chaopeng.grchaos.application.GrChaosApplicationMain` in lib module
+7. run `gradle distZip` to build the project. `application.conf` is not include in the build, you can use program param to define a different configure in production 
 
 Here is a [sample project](https://github.com/chaopeng/grchaos-sample) to show how to build a howswapable webservice. 
 
