@@ -19,7 +19,7 @@ apply plugin: 'groovy'
 apply plugin: 'idea'
 apply plugin: 'signing'
 
-ext.v = '1.0.0-alpha-2'
+ext.v = '1.0.0-rc'
 
 subprojects {
 

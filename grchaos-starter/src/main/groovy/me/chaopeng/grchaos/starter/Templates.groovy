@@ -50,8 +50,8 @@ subprojects {
 ext.libs = [
     grchaos : [
         'org.codehaus.groovy:groovy-all:2.4.6',
-        'me.chaopeng.grchaos:grchaos-summer:1.0.0-alpha-2',
-        'me.chaopeng.grchaos:grchaos-application:1.0.0-alpha-2'
+        'me.chaopeng.grchaos:grchaos-summer:1.0.0-rc',
+        'me.chaopeng.grchaos:grchaos-application:1.0.0-rc'
     ],
 ]
 '''
