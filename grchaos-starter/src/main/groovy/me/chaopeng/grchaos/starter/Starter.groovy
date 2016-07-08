@@ -28,6 +28,7 @@ class Starter {
 
         initPath(dir, projectName)
 
+        println "done. "
     }
 
     public static void initPath(File dir, String projectName) {
@@ -84,6 +85,9 @@ class Starter {
     }
 
     private static void write(String s, String filepath) {
+
+        println "generating $filepath"
+
         Files.write(s, new File(filepath), Charsets.UTF_8)
     }
 }
