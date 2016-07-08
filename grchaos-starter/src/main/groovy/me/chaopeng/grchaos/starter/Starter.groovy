@@ -47,7 +47,7 @@ class Starter {
         write(Templates.rootBuild, root + "/build.gradle")
 
         // /setting.gradle
-        write(Templates.settings, bind, root + "/setting.gradle")
+        write(Templates.settings, bind, root + "/settings.gradle")
 
         // /libs.gradle
         write(Templates.libs, root + "/libs.gradle")
