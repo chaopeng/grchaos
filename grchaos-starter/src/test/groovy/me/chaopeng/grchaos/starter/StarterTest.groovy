@@ -9,6 +9,6 @@ package me.chaopeng.grchaos.starter
  */
 class StarterTest {
     public static void main(String[] args) {
-        Starter.initPath(new File("tmp"), "tmp")
+        Starter.initPath(new File("../tmp"), "tmp")
     }
 }
