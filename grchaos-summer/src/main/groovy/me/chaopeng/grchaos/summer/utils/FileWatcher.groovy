@@ -3,10 +3,10 @@ package me.chaopeng.grchaos.summer.utils
 import groovy.util.logging.Slf4j
 import me.chaopeng.grchaos.summer.bean.Changes
 import me.chaopeng.grchaos.summer.bean.DirInfo
-import rx.Observable
-import rx.schedulers.Schedulers
 
 import java.nio.file.*
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 /**
@@ -20,6 +20,8 @@ class FileWatcher {
 
     private final WatchService watchService
     private final List<DirInfo> dirs = []
+
+    private static final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1)
 
     FileWatcher(List<String> filepaths) {
         watchService = FileSystems.getDefault().newWatchService()
@@ -77,7 +79,7 @@ class FileWatcher {
     static FileWatcher watchDir(List<String> paths, int intervalSecond, Closure closure) throws IOException {
         FileWatcher fileWatcher = new FileWatcher(paths)
 
-        Observable.interval(intervalSecond, intervalSecond, TimeUnit.SECONDS).observeOn(Schedulers.newThread()).subscribe {
+        scheduledExecutorService.scheduleWithFixedDelay({
 
             // if dir has any changes
             if (fileWatcher.isChange()) {
@@ -91,7 +93,7 @@ class FileWatcher {
                     }
                 }
             }
-        }
+        }, intervalSecond, intervalSecond, TimeUnit.SECONDS)
 
         fileWatcher
     }

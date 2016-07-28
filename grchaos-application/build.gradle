@@ -4,7 +4,6 @@ dependencies {
             libs.groovy,
             libs.guava,
             libs.slf4j,
-            libs.rxgroovy
     )
 
     testCompile project(':grchaos-summer').sourceSets.test.output
